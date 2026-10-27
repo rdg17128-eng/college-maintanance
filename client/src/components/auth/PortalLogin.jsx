@@ -93,8 +93,9 @@ export function PortalLogin({ onLoginSuccess }) {
     <div className="min-h-[75vh] flex items-center justify-center p-4 bg-white">
       <div className="max-w-md w-full bg-white rounded-xl border border-sky-300 p-8 shadow-sm text-black">
         
-        {/* Header */}
+        {/* Header with Logo */}
         <div className="text-center mb-6">
+          <img src="/logo.png" alt="CampusCare Logo" className="w-16 h-16 object-contain mx-auto mb-3" />
           <h1 className="text-2xl font-bold text-black">
             CampusCare Maintenance
           </h1>

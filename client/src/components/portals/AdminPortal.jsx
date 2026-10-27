@@ -61,13 +61,16 @@ export function AdminPortal() {
       
       {/* SECTION 1: Top Banner - Sky Blue Background, Black Text */}
       <section className="p-6 bg-sky-100 border border-sky-300 rounded-lg flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-black">
-            Facilities Command Center (Admin)
-          </h1>
-          <p className="text-xs text-black mt-1">
-            Overview of all campus maintenance tickets, status updates, and reports.
-          </p>
+        <div className="flex items-center gap-3">
+          <img src="/logo.png" alt="CampusCare Logo" className="w-10 h-10 object-contain" />
+          <div>
+            <h1 className="text-2xl font-bold text-black">
+              Facilities Command Center (Admin)
+            </h1>
+            <p className="text-xs text-black mt-1">
+              Overview of all campus maintenance tickets, status updates, and reports.
+            </p>
+          </div>
         </div>
 
         <button
