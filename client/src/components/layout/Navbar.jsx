@@ -17,12 +17,12 @@ export function Navbar() {
 
   return (
     <header className="bg-white border-b border-sky-300">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
         
         {/* Brand with Logo */}
         <div className="flex items-center gap-3">
-          <img src="/logo.png" alt="CampusCare Logo" className="w-8 h-8 object-contain" />
-          <span className="font-bold text-xl text-black tracking-tight">
+          <img src="/logo.png" alt="CampusCare Logo" className="h-14 w-auto object-contain" />
+          <span className="font-bold text-2xl text-black tracking-tight">
             CampusCare
           </span>
           <span className="text-xs font-bold uppercase tracking-wider text-black bg-sky-100 px-2.5 py-0.5 rounded border border-sky-300">

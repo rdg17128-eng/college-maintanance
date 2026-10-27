@@ -51,8 +51,8 @@ export function UserPortal() {
       
       {/* SECTION 1: Header Banner - Sky Blue Background, Black Text */}
       <section className="p-6 bg-sky-100 border border-sky-300 rounded-lg flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <img src="/logo.png" alt="CampusCare Logo" className="w-10 h-10 object-contain" />
+        <div className="flex items-center gap-4">
+          <img src="/logo.png" alt="CampusCare Logo" className="h-20 w-auto object-contain" />
           <div>
             <h1 className="text-2xl font-bold text-black">
               Maintenance Dashboard
