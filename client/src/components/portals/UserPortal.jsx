@@ -52,7 +52,9 @@ export function UserPortal() {
       {/* SECTION 1: Header Banner - Sky Blue Background, Black Text */}
       <section className="p-6 bg-sky-100 border border-sky-300 rounded-lg flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center gap-4">
-          <img src="/logo.png" alt="CampusCare Logo" className="h-20 w-auto object-contain" />
+          <div className="w-20 h-20 rounded-full border-3 border-sky-400 bg-white flex items-center justify-center p-2 overflow-hidden shrink-0 shadow-sm">
+            <img src="/logo.png" alt="CampusCare Logo" className="w-full h-full object-contain" />
+          </div>
           <div>
             <h1 className="text-2xl font-bold text-black">
               Maintenance Dashboard

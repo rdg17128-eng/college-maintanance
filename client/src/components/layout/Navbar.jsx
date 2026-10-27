@@ -19,9 +19,11 @@ export function Navbar() {
     <header className="bg-white border-b border-sky-300">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
         
-        {/* Brand with Logo */}
+        {/* Brand with Circular Logo */}
         <div className="flex items-center gap-3">
-          <img src="/logo.png" alt="CampusCare Logo" className="h-14 w-auto object-contain" />
+          <div className="w-14 h-14 rounded-full border-2 border-sky-400 bg-white flex items-center justify-center p-1 overflow-hidden shrink-0 shadow-xs">
+            <img src="/logo.png" alt="CampusCare Logo" className="w-full h-full object-contain" />
+          </div>
           <span className="font-bold text-2xl text-black tracking-tight">
             CampusCare
           </span>

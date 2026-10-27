@@ -93,9 +93,11 @@ export function PortalLogin({ onLoginSuccess }) {
     <div className="min-h-[75vh] flex items-center justify-center p-4 bg-white">
       <div className="max-w-md w-full bg-white rounded-xl border border-sky-300 p-8 shadow-sm text-black">
         
-        {/* Header with Logo */}
+        {/* Header with Large Circular Logo */}
         <div className="text-center mb-6">
-          <img src="/logo.png" alt="CampusCare Logo" className="h-28 w-auto object-contain mx-auto mb-3" />
+          <div className="w-36 h-36 rounded-full border-4 border-sky-400 bg-white flex items-center justify-center p-3 mx-auto mb-4 shadow-sm overflow-hidden">
+            <img src="/logo.png" alt="CampusCare Logo" className="w-full h-full object-contain" />
+          </div>
           <h1 className="text-2xl font-bold text-black">
             CampusCare Maintenance
           </h1>
