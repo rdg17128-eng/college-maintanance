@@ -1,15 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import {
-  Plus,
-  Search,
-  Clock,
-  Building2,
-  ChevronRight,
-  Inbox
-} from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { StatusBadge, PriorityBadge } from '../common/Badges';
-import { CategoryIcon } from '../common/CategoryIcon';
 import { ComplaintFormModal } from '../complaints/ComplaintFormModal';
 import { ComplaintDetailModal } from '../complaints/ComplaintDetailModal';
 import { api } from '../../services/api';
@@ -58,65 +49,80 @@ export function UserPortal() {
   return (
     <div className="space-y-6">
       
-      {/* Top Banner / Actions */}
-      <div className="bg-white rounded-2xl border border-slate-200 p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-xs">
+      {/* SECTION 1: Header Banner - Text Only */}
+      <section className="p-6 bg-sky-50 border border-sky-200 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
+          <h1 className="text-2xl font-bold text-slate-900">
             Maintenance Dashboard
           </h1>
-          <p className="text-xs sm:text-sm text-slate-500 mt-1">
-            Welcome, <span className="font-semibold text-slate-700">{user?.name}</span>. Report campus maintenance needs or check status.
+          <p className="text-xs text-slate-600 mt-1">
+            Welcome, <span className="font-bold">{user?.name}</span>. Report campus maintenance issues or view status.
           </p>
         </div>
 
         <button
           onClick={() => setIsFormOpen(true)}
-          className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl shadow-sm transition-all flex items-center justify-center gap-2 text-sm shrink-0"
+          className="px-5 py-2.5 bg-sky-600 hover:bg-sky-700 text-white font-bold rounded-lg text-xs cursor-pointer"
           id="report-issue-btn"
         >
-          <Plus className="w-4 h-4" />
-          Report Issue
+          + Report Issue
         </button>
-      </div>
+      </section>
 
-      {/* 3 Metric Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs">
-          <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider block">
+      {/* SECTION 2: 3 Metric Cards - 3 Light Colors, Text Only */}
+      <section className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        
+        {/* Light Color 1: Sky */}
+        <div className="p-5 bg-sky-50 border border-sky-200 rounded-xl">
+          <div className="text-xs font-bold text-sky-800 uppercase tracking-wider">
             Total Tickets
-          </span>
-          <div className="text-2xl font-bold text-slate-900 mt-1">{complaints.length}</div>
-          <span className="text-[11px] text-slate-400 mt-0.5 block">Recorded requests</span>
+          </div>
+          <div className="text-3xl font-bold text-sky-950 mt-2">
+            {complaints.length}
+          </div>
+          <div className="text-[11px] text-sky-700 mt-1">
+            All submitted requests
+          </div>
         </div>
 
-        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs">
-          <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider block">
-            In Progress / Pending
-          </span>
-          <div className="text-2xl font-bold text-blue-600 mt-1">{activeCount}</div>
-          <span className="text-[11px] text-slate-400 mt-0.5 block">Under resolution</span>
+        {/* Light Color 2: Lavender */}
+        <div className="p-5 bg-violet-50 border border-violet-200 rounded-xl">
+          <div className="text-xs font-bold text-violet-800 uppercase tracking-wider">
+            In Progress
+          </div>
+          <div className="text-3xl font-bold text-violet-950 mt-2">
+            {activeCount}
+          </div>
+          <div className="text-[11px] text-violet-700 mt-1">
+            Work currently ongoing
+          </div>
         </div>
 
-        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs">
-          <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider block">
+        {/* Light Color 3: Mint */}
+        <div className="p-5 bg-emerald-50 border border-emerald-200 rounded-xl">
+          <div className="text-xs font-bold text-emerald-800 uppercase tracking-wider">
             Resolved
-          </span>
-          <div className="text-2xl font-bold text-emerald-600 mt-1">{resolvedCount}</div>
-          <span className="text-[11px] text-slate-400 mt-0.5 block">Completed fixes</span>
+          </div>
+          <div className="text-3xl font-bold text-emerald-950 mt-2">
+            {resolvedCount}
+          </div>
+          <div className="text-[11px] text-emerald-700 mt-1">
+            Successfully completed
+          </div>
         </div>
-      </div>
 
-      {/* Filter and Search Bar */}
-      <div className="bg-white p-3 sm:p-4 rounded-2xl border border-slate-200 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-3">
-        {/* Status Tabs */}
-        <div className="flex items-center gap-1 overflow-x-auto w-full sm:w-auto p-1 bg-slate-100 rounded-xl text-xs font-medium">
+      </section>
+
+      {/* SECTION 3: Filter & Search Bar - Text Only */}
+      <section className="p-4 bg-white border border-slate-200 rounded-xl flex flex-col sm:flex-row items-center justify-between gap-3">
+        <div className="flex items-center gap-1.5 overflow-x-auto w-full sm:w-auto p-1 bg-slate-100 rounded-lg text-xs font-bold">
           {['All', 'Submitted', 'In Progress', 'Resolved'].map((st) => (
             <button
               key={st}
               onClick={() => setStatusFilter(st)}
-              className={`px-3 py-1.5 rounded-lg transition-all whitespace-nowrap ${
+              className={`px-3 py-1 rounded cursor-pointer ${
                 statusFilter === st
-                  ? 'bg-white text-blue-700 shadow-xs font-semibold'
+                  ? 'bg-sky-600 text-white'
                   : 'text-slate-600 hover:text-slate-900'
               }`}
             >
@@ -125,108 +131,90 @@ export function UserPortal() {
           ))}
         </div>
 
-        {/* Search */}
-        <form onSubmit={handleSearchSubmit} className="relative w-full sm:w-72">
-          <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+        <form onSubmit={handleSearchSubmit} className="w-full sm:w-72 flex gap-2">
           <input
             type="text"
-            placeholder="Search by ID, room, or issue..."
+            placeholder="Search complaints..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-9 pr-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:outline-none focus:ring-2 focus:ring-blue-500/20 text-slate-800 placeholder:text-slate-400"
+            className="w-full px-3 py-1.5 bg-slate-50 border border-slate-300 rounded-lg text-xs text-slate-800 focus:outline-none focus:border-sky-500"
           />
-        </form>
-      </div>
-
-      {/* Complaints Cards Grid */}
-      {loading ? (
-        <div className="py-16 text-center text-slate-400 text-xs">
-          <div className="w-7 h-7 border-2 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-2" />
-          Loading complaints...
-        </div>
-      ) : complaints.length === 0 ? (
-        <div className="bg-white rounded-2xl border border-slate-200 p-12 text-center shadow-xs">
-          <div className="w-12 h-12 bg-slate-100 text-slate-400 rounded-xl flex items-center justify-center mx-auto mb-3">
-            <Inbox className="w-6 h-6" />
-          </div>
-          <h3 className="font-semibold text-slate-800 text-sm">No complaints found</h3>
-          <p className="text-xs text-slate-400 mt-1 max-w-sm mx-auto">
-            {statusFilter !== 'All' 
-              ? `No complaints currently matched under "${statusFilter}".` 
-              : "Everything is operating smoothly. Click below to file a new maintenance request."}
-          </p>
           <button
-            onClick={() => setIsFormOpen(true)}
-            className="mt-4 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium text-xs rounded-xl shadow-xs transition-all inline-flex items-center gap-1.5"
+            type="submit"
+            className="px-3 py-1.5 bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-bold rounded cursor-pointer"
           >
-            <Plus className="w-3.5 h-3.5" />
-            Report Issue
+            Search
           </button>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {complaints.map((item) => (
-            <div
-              key={item.complaint_id}
-              onClick={() => setSelectedComplaintId(item.complaint_id)}
-              className="group bg-white rounded-2xl p-5 border border-slate-200 hover:border-blue-300 hover:shadow-md transition-all cursor-pointer flex flex-col justify-between"
+        </form>
+      </section>
+
+      {/* SECTION 4: Complaints Feed - Text Only */}
+      <section>
+        {loading ? (
+          <div className="p-12 text-center text-slate-500 text-xs bg-white border border-slate-200 rounded-xl">
+            Loading complaints data...
+          </div>
+        ) : complaints.length === 0 ? (
+          <div className="p-12 text-center bg-white border border-slate-200 rounded-xl text-slate-600">
+            <h3 className="font-bold text-sm">No complaints found</h3>
+            <p className="text-xs text-slate-400 mt-1">
+              There are no records matching your current filter.
+            </p>
+            <button
+              onClick={() => setIsFormOpen(true)}
+              className="mt-4 px-4 py-2 bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold rounded cursor-pointer"
             >
-              <div>
-                {/* Header: ID, Status, Priority */}
-                <div className="flex items-center justify-between gap-2 mb-3">
-                  <div className="flex items-center gap-2">
-                    <span className="font-mono text-xs font-semibold text-blue-700 bg-blue-50 px-2 py-0.5 rounded-md border border-blue-200">
-                      {item.complaint_id}
+              Report New Issue
+            </button>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {complaints.map((item) => (
+              <div
+                key={item.complaint_id}
+                onClick={() => setSelectedComplaintId(item.complaint_id)}
+                className="bg-white border border-slate-200 hover:border-sky-400 p-5 rounded-xl cursor-pointer transition-colors flex flex-col justify-between"
+              >
+                <div>
+                  <div className="flex items-center justify-between gap-2 mb-2">
+                    <span className="font-mono text-xs font-bold text-sky-700 bg-sky-50 px-2 py-0.5 rounded border border-sky-200">
+                      ID: {item.complaint_id}
                     </span>
-                    <StatusBadge status={item.status} size="xs" />
+                    <div className="flex gap-1.5">
+                      <StatusBadge status={item.status} size="xs" />
+                      <PriorityBadge priority={item.priority} size="xs" />
+                    </div>
                   </div>
-                  <PriorityBadge priority={item.priority} size="xs" />
+
+                  <h3 className="text-sm font-bold text-slate-900 mt-2">
+                    {item.category} - Room {item.room_number}
+                  </h3>
+                  <div className="text-xs text-slate-500 mt-0.5">
+                    Building: {item.building} | Floor: {item.floor}
+                  </div>
+
+                  <p className="text-xs text-slate-700 mt-2 line-clamp-2">
+                    {item.description}
+                  </p>
+
+                  {item.resolution_remarks && (
+                    <div className="mt-2.5 p-2 bg-emerald-50 border border-emerald-200 rounded text-[11px] text-emerald-800">
+                      <strong>Resolution Note:</strong> {item.resolution_remarks}
+                    </div>
+                  )}
                 </div>
 
-                {/* Category & Location */}
-                <div className="flex items-start gap-2.5 mb-2">
-                  <div className="p-2 rounded-lg bg-slate-50 border border-slate-100 shrink-0">
-                    <CategoryIcon category={item.category} className="w-4 h-4" />
-                  </div>
-                  <div>
-                    <h3 className="text-sm font-semibold text-slate-800 group-hover:text-blue-600 transition-colors">
-                      {item.category} — {item.room_number}
-                    </h3>
-                    <p className="text-xs text-slate-500 flex items-center gap-1 mt-0.5">
-                      <Building2 className="w-3 h-3 text-slate-400" />
-                      {item.building} • {item.floor}
-                    </p>
-                  </div>
+                <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
+                  <span>Date: {new Date(item.created_date).toLocaleDateString()}</span>
+                  <span className="text-sky-700 font-bold hover:underline">
+                    View Details &gt;&gt;
+                  </span>
                 </div>
-
-                {/* Description */}
-                <p className="text-xs text-slate-600 line-clamp-2 leading-relaxed mt-2 pl-0.5">
-                  {item.description}
-                </p>
-
-                {/* Resolution Remarks */}
-                {item.resolution_remarks && (
-                  <div className="mt-3 p-2 rounded-xl bg-emerald-50 border border-emerald-200 text-[11px] text-emerald-800">
-                    <span className="font-semibold block">Resolution note:</span>
-                    {item.resolution_remarks}
-                  </div>
-                )}
               </div>
-
-              {/* Card Footer */}
-              <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-400">
-                <span className="flex items-center gap-1">
-                  <Clock className="w-3.5 h-3.5 text-slate-400" />
-                  {new Date(item.created_date).toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' })}
-                </span>
-                <span className="text-blue-600 font-medium group-hover:translate-x-0.5 transition-transform flex items-center gap-1 text-xs">
-                  View <ChevronRight className="w-3.5 h-3.5" />
-                </span>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
+            ))}
+          </div>
+        )}
+      </section>
 
       {/* Modals */}
       <ComplaintFormModal

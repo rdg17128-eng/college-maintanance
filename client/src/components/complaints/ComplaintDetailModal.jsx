@@ -1,10 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import {
-  X,
-  ExternalLink
-} from 'lucide-react';
 import { StatusBadge, PriorityBadge } from '../common/Badges';
-import { CategoryIcon } from '../common/CategoryIcon';
 import { useAuth } from '../../context/AuthContext';
 import { api } from '../../services/api';
 import { useToast } from '../../context/ToastContext';
@@ -55,7 +50,6 @@ export function ComplaintDetailModal({ complaintId, onClose, onRefresh }) {
       addToast(`Status updated to ${newStatus}`, 'success');
       if (onRefresh) onRefresh();
       
-      // Refresh modal data
       const res = await api.getComplaintDetail(complaintId);
       setData(res);
       setRemarks('');
@@ -71,13 +65,13 @@ export function ComplaintDetailModal({ complaintId, onClose, onRefresh }) {
   const isAdmin = user?.role === 'admin';
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs">
-      <div className="bg-white rounded-3xl border border-slate-200 max-w-xl w-full p-6 shadow-2xl relative text-slate-800 animate-in fade-in duration-200 max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40">
+      <div className="bg-white rounded-xl border border-slate-300 max-w-xl w-full p-6 shadow-lg relative text-slate-800 max-h-[90vh] overflow-y-auto">
         
-        {/* Header */}
-        <div className="flex items-center justify-between pb-4 border-b border-slate-100">
+        {/* Header - Text Only */}
+        <div className="flex items-center justify-between pb-3 border-b border-slate-200">
           <div className="flex items-center gap-2">
-            <span className="font-mono font-bold text-sm text-slate-900">
+            <span className="font-mono font-bold text-sm text-sky-800 bg-sky-50 px-2 py-0.5 rounded border border-sky-200">
               {complaint ? complaint.complaint_id : 'Ticket Details'}
             </span>
             {complaint && (
@@ -89,15 +83,14 @@ export function ComplaintDetailModal({ complaintId, onClose, onRefresh }) {
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-100 transition-colors"
+            className="px-2.5 py-1 text-slate-600 hover:bg-slate-100 rounded border border-slate-200 text-xs font-bold cursor-pointer"
           >
-            <X className="w-5 h-5" />
+            Close
           </button>
         </div>
 
         {loading ? (
-          <div className="py-16 text-center text-slate-400 text-xs">
-            <div className="w-6 h-6 border-2 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-2" />
+          <div className="py-12 text-center text-slate-500 text-xs">
             Loading ticket details...
           </div>
         ) : !complaint ? (
@@ -105,42 +98,33 @@ export function ComplaintDetailModal({ complaintId, onClose, onRefresh }) {
             Unable to locate complaint details.
           </div>
         ) : (
-          <div className="mt-4 space-y-5 text-xs">
+          <div className="mt-4 space-y-4 text-xs">
             
-            {/* Location & Category Box */}
-            <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
-              <div className="flex items-center gap-2">
-                <CategoryIcon category={complaint.category} className="w-4 h-4 shrink-0" />
-                <span className="font-semibold text-slate-800 text-sm">{complaint.category}</span>
+            {/* Location & Metadata Box */}
+            <div className="p-4 bg-sky-50 border border-sky-200 rounded-lg space-y-1.5">
+              <div className="font-bold text-slate-900 text-sm">
+                Category: {complaint.category}
               </div>
-              <div className="grid grid-cols-2 gap-2 text-slate-600 text-[11px] pt-1">
+              <div className="grid grid-cols-2 gap-2 text-slate-700 text-xs pt-1">
                 <div>
-                  <span className="text-slate-400 block">Location:</span>
-                  <span className="font-medium text-slate-800">{complaint.building}</span>
+                  <strong>Building:</strong> {complaint.building}
                 </div>
                 <div>
-                  <span className="text-slate-400 block">Room & Floor:</span>
-                  <span className="font-medium text-slate-800">{complaint.room_number} ({complaint.floor})</span>
+                  <strong>Room & Floor:</strong> {complaint.room_number} ({complaint.floor})
                 </div>
                 <div>
-                  <span className="text-slate-400 block">Reported By:</span>
-                  <span className="font-medium text-slate-800">{complaint.reporter_name} ({complaint.reporter_role})</span>
+                  <strong>Reported By:</strong> {complaint.reporter_name} ({complaint.reporter_role})
                 </div>
                 <div>
-                  <span className="text-slate-400 block">Date Logged:</span>
-                  <span className="font-medium text-slate-800">
-                    {new Date(complaint.created_date).toLocaleString()}
-                  </span>
+                  <strong>Date:</strong> {new Date(complaint.created_date).toLocaleString()}
                 </div>
               </div>
             </div>
 
             {/* Description */}
             <div>
-              <span className="font-semibold text-slate-700 block mb-1">
-                Problem Description
-              </span>
-              <div className="p-3 bg-white border border-slate-200 rounded-xl text-slate-700 leading-relaxed font-medium">
+              <strong className="block text-slate-700 mb-1">Problem Description:</strong>
+              <div className="p-3 bg-slate-50 border border-slate-200 rounded text-slate-800 leading-relaxed">
                 {complaint.description}
               </div>
             </div>
@@ -148,47 +132,35 @@ export function ComplaintDetailModal({ complaintId, onClose, onRefresh }) {
             {/* Attached Photo */}
             {complaint.image_url && (
               <div>
-                <span className="font-semibold text-slate-700 block mb-1">
-                  Attached Photo
-                </span>
-                <div className="relative rounded-2xl overflow-hidden border border-slate-200 bg-slate-50 max-h-56 flex items-center justify-center">
-                  <img
-                    src={complaint.image_url}
-                    alt="Maintenance issue"
-                    className="object-contain max-h-56 w-full"
-                  />
+                <strong className="block text-slate-700 mb-1">Attached Photo:</strong>
+                <div className="p-2 border border-slate-200 rounded bg-slate-50">
                   <a
                     href={complaint.image_url}
                     target="_blank"
                     rel="noreferrer"
-                    className="absolute top-2 right-2 bg-white/90 backdrop-blur-md px-2 py-1 rounded-lg text-[10px] font-semibold text-slate-700 border border-slate-200 shadow-xs flex items-center gap-1 hover:text-blue-600"
+                    className="text-sky-700 font-bold hover:underline"
                   >
-                    Open Full <ExternalLink className="w-3 h-3" />
+                    [View Full Image]
                   </a>
                 </div>
               </div>
             )}
 
-            {/* History / Timeline */}
+            {/* History - Text Only */}
             <div>
-              <span className="font-semibold text-slate-700 block mb-2">
-                Activity History
-              </span>
-              <div className="space-y-2 max-h-40 overflow-y-auto pr-1">
+              <strong className="block text-slate-700 mb-2">Activity Timeline:</strong>
+              <div className="space-y-1.5 max-h-40 overflow-y-auto">
                 {history.map((h, i) => (
-                  <div key={i} className="flex items-start gap-2.5 p-2.5 bg-slate-50 border border-slate-100 rounded-xl text-[11px]">
-                    <div className="w-1.5 h-1.5 rounded-full bg-blue-500 mt-1.5 shrink-0" />
-                    <div className="flex-1">
-                      <div className="flex items-center justify-between text-slate-800 font-medium">
-                        <span>Status: <strong className="text-blue-700">{h.new_status}</strong></span>
-                        <span className="text-slate-400 text-[10px]">
-                          {new Date(h.timestamp).toLocaleDateString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
-                        </span>
-                      </div>
-                      {h.remarks && (
-                        <p className="text-slate-500 mt-0.5">{h.remarks}</p>
-                      )}
+                  <div key={i} className="p-2 bg-slate-50 border border-slate-200 rounded text-[11px]">
+                    <div className="flex justify-between font-bold text-slate-800">
+                      <span>Status: {h.new_status}</span>
+                      <span className="text-slate-500 font-normal">
+                        {new Date(h.timestamp).toLocaleString()}
+                      </span>
                     </div>
+                    {h.remarks && (
+                      <div className="text-slate-600 mt-0.5">{h.remarks}</div>
+                    )}
                   </div>
                 ))}
               </div>
@@ -196,20 +168,20 @@ export function ComplaintDetailModal({ complaintId, onClose, onRefresh }) {
 
             {/* Admin Status Update Form */}
             {isAdmin && (
-              <form onSubmit={handleUpdateStatus} className="p-4 rounded-2xl bg-purple-50/50 border border-purple-200 space-y-3">
-                <span className="font-semibold text-purple-900 block text-xs">
+              <form onSubmit={handleUpdateStatus} className="p-4 bg-violet-50 border border-violet-200 rounded-lg space-y-3">
+                <strong className="block text-violet-900 text-xs">
                   Administrative Action: Update Status
-                </span>
+                </strong>
                 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   <div>
-                    <label className="block text-slate-700 font-medium text-[11px] mb-1">
+                    <label className="block text-slate-700 font-bold text-[11px] mb-1">
                       Change Status
                     </label>
                     <select
                       value={newStatus}
                       onChange={(e) => setNewStatus(e.target.value)}
-                      className="w-full bg-white border border-slate-200 rounded-xl px-2.5 py-1.5 text-slate-800 font-medium focus:outline-none focus:ring-2 focus:ring-purple-500/20"
+                      className="w-full bg-white border border-slate-300 rounded px-2 py-1 text-slate-800 font-semibold focus:outline-none focus:border-violet-500"
                     >
                       <option value="Submitted">Submitted</option>
                       <option value="Under Review">Under Review</option>
@@ -220,15 +192,15 @@ export function ComplaintDetailModal({ complaintId, onClose, onRefresh }) {
                   </div>
 
                   <div>
-                    <label className="block text-slate-700 font-medium text-[11px] mb-1">
-                      Resolution Remarks (Optional)
+                    <label className="block text-slate-700 font-bold text-[11px] mb-1">
+                      Resolution Note (Optional)
                     </label>
                     <input
                       type="text"
-                      placeholder="e.g. Electrician fixed switch"
+                      placeholder="e.g. Technician repaired wiring"
                       value={remarks}
                       onChange={(e) => setRemarks(e.target.value)}
-                      className="w-full bg-white border border-slate-200 rounded-xl px-2.5 py-1.5 text-slate-800 font-medium focus:outline-none focus:ring-2 focus:ring-purple-500/20"
+                      className="w-full bg-white border border-slate-300 rounded px-2 py-1 text-slate-800 focus:outline-none focus:border-violet-500"
                     />
                   </div>
                 </div>
@@ -237,20 +209,20 @@ export function ComplaintDetailModal({ complaintId, onClose, onRefresh }) {
                   <button
                     type="submit"
                     disabled={saving}
-                    className="px-4 py-1.5 bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-xl shadow-xs transition-all text-xs"
+                    className="px-4 py-1.5 bg-violet-600 hover:bg-violet-700 text-white font-bold rounded text-xs cursor-pointer"
                   >
-                    {saving ? 'Updating...' : 'Save Status'}
+                    {saving ? 'Saving...' : 'Save Status'}
                   </button>
                 </div>
               </form>
             )}
 
-            {/* Modal Footer */}
-            <div className="pt-3 border-t border-slate-100 flex justify-end">
+            {/* Close Button */}
+            <div className="pt-3 border-t border-slate-200 flex justify-end">
               <button
                 type="button"
                 onClick={onClose}
-                className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-medium transition-colors"
+                className="px-4 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded font-bold text-xs cursor-pointer"
               >
                 Close
               </button>

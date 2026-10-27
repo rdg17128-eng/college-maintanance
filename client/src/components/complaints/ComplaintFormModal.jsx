@@ -1,9 +1,4 @@
 import React, { useState } from 'react';
-import {
-  X,
-  Upload,
-  Trash2
-} from 'lucide-react';
 import { BUILDINGS, CATEGORIES, PRIORITIES } from '../../constants';
 import { api } from '../../services/api';
 import { useToast } from '../../context/ToastContext';
@@ -49,7 +44,7 @@ export function ComplaintFormModal({ isOpen, onClose, onSuccess }) {
     e.preventDefault();
 
     if (!roomNumber.trim()) {
-      addToast('Please specify the room number or location code (e.g. Lab 204 or Hall A)', 'error');
+      addToast('Please specify the room number or location code', 'error');
       return;
     }
 
@@ -71,7 +66,7 @@ export function ComplaintFormModal({ isOpen, onClose, onSuccess }) {
         imageUrl: imageUrl || null
       });
 
-      addToast('Maintenance issue reported successfully!', 'success');
+      addToast('Maintenance issue reported successfully', 'success');
       if (onSuccess) onSuccess();
       onClose();
     } catch (err) {
@@ -82,14 +77,14 @@ export function ComplaintFormModal({ isOpen, onClose, onSuccess }) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs">
-      <div className="bg-white rounded-3xl border border-slate-200 max-w-lg w-full p-6 shadow-2xl relative text-slate-800 animate-in fade-in duration-200 max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40">
+      <div className="bg-white rounded-xl border border-slate-300 max-w-lg w-full p-6 shadow-lg relative text-slate-800 max-h-[92vh] overflow-y-auto">
         
-        {/* Modal Header */}
-        <div className="flex items-center justify-between pb-4 border-b border-slate-100">
+        {/* Header - Text Only */}
+        <div className="flex items-center justify-between pb-3 border-b border-slate-200">
           <div>
             <h2 className="text-lg font-bold text-slate-900">
-              Report Maintenance Issue
+              Report Campus Issue
             </h2>
             <p className="text-xs text-slate-500">
               Fill in the location and details of the required repair.
@@ -97,24 +92,23 @@ export function ComplaintFormModal({ isOpen, onClose, onSuccess }) {
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-100 transition-colors"
+            className="px-2.5 py-1 text-slate-600 hover:bg-slate-100 rounded border border-slate-200 text-xs font-bold cursor-pointer"
           >
-            <X className="w-5 h-5" />
+            Close
           </button>
         </div>
 
-        {/* Modal Form */}
+        {/* Form - Simple Code & Text Only */}
         <form onSubmit={handleSubmit} className="mt-4 space-y-4 text-xs">
           
-          {/* Category */}
           <div>
-            <label className="block text-slate-700 font-semibold mb-1">
+            <label className="block text-slate-700 font-bold mb-1">
               Issue Category *
             </label>
             <select
               value={category}
               onChange={(e) => setCategory(e.target.value)}
-              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-800 font-medium focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+              className="w-full bg-slate-50 border border-slate-300 rounded px-3 py-2 text-slate-800 font-medium focus:outline-none focus:border-sky-500 cursor-pointer"
             >
               {CATEGORIES.map(cat => (
                 <option key={cat.id} value={cat.id}>
@@ -124,16 +118,15 @@ export function ComplaintFormModal({ isOpen, onClose, onSuccess }) {
             </select>
           </div>
 
-          {/* Building & Floor */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label className="block text-slate-700 font-semibold mb-1">
+              <label className="block text-slate-700 font-bold mb-1">
                 Building *
               </label>
               <select
                 value={building}
                 onChange={(e) => setBuilding(e.target.value)}
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-800 font-medium focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                className="w-full bg-slate-50 border border-slate-300 rounded px-3 py-2 text-slate-800 font-medium focus:outline-none focus:border-sky-500 cursor-pointer"
               >
                 {BUILDINGS.map(b => (
                   <option key={b.name} value={b.name}>{b.name}</option>
@@ -142,13 +135,13 @@ export function ComplaintFormModal({ isOpen, onClose, onSuccess }) {
             </div>
 
             <div>
-              <label className="block text-slate-700 font-semibold mb-1">
+              <label className="block text-slate-700 font-bold mb-1">
                 Floor *
               </label>
               <select
                 value={floor}
                 onChange={(e) => setFloor(e.target.value)}
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-800 font-medium focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                className="w-full bg-slate-50 border border-slate-300 rounded px-3 py-2 text-slate-800 font-medium focus:outline-none focus:border-sky-500 cursor-pointer"
               >
                 <option value="Ground Floor">Ground Floor</option>
                 <option value="1st Floor">1st Floor</option>
@@ -159,10 +152,9 @@ export function ComplaintFormModal({ isOpen, onClose, onSuccess }) {
             </div>
           </div>
 
-          {/* Room Number & Priority */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label className="block text-slate-700 font-semibold mb-1">
+              <label className="block text-slate-700 font-bold mb-1">
                 Room / Area Code *
               </label>
               <input
@@ -171,18 +163,18 @@ export function ComplaintFormModal({ isOpen, onClose, onSuccess }) {
                 placeholder="e.g. Room 204 or Lab 3"
                 value={roomNumber}
                 onChange={(e) => setRoomNumber(e.target.value)}
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-800 font-medium focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                className="w-full bg-slate-50 border border-slate-300 rounded px-3 py-2 text-slate-800 font-medium focus:outline-none focus:border-sky-500"
               />
             </div>
 
             <div>
-              <label className="block text-slate-700 font-semibold mb-1">
-                Urgency / Priority *
+              <label className="block text-slate-700 font-bold mb-1">
+                Priority *
               </label>
               <select
                 value={priority}
                 onChange={(e) => setPriority(e.target.value)}
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-800 font-medium focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                className="w-full bg-slate-50 border border-slate-300 rounded px-3 py-2 text-slate-800 font-medium focus:outline-none focus:border-sky-500 cursor-pointer"
               >
                 {PRIORITIES.map(p => (
                   <option key={p.id} value={p.id}>
@@ -193,47 +185,39 @@ export function ComplaintFormModal({ isOpen, onClose, onSuccess }) {
             </div>
           </div>
 
-          {/* Description */}
           <div>
-            <label className="block text-slate-700 font-semibold mb-1">
+            <label className="block text-slate-700 font-bold mb-1">
               Description of Problem *
             </label>
             <textarea
               required
               rows={3}
-              placeholder="Describe the issue clearly (e.g. Fan 2 regulator is stuck, AC is leaking water...)"
+              placeholder="Describe the issue clearly..."
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-800 font-medium focus:outline-none focus:ring-2 focus:ring-blue-500/20 resize-none"
+              className="w-full bg-slate-50 border border-slate-300 rounded px-3 py-2 text-slate-800 font-medium focus:outline-none focus:border-sky-500 resize-none"
             />
           </div>
 
-          {/* Image Upload */}
           <div>
-            <label className="block text-slate-700 font-semibold mb-1">
-              Attach Photo (Optional)
+            <label className="block text-slate-700 font-bold mb-1">
+              Photo Attachment (Optional)
             </label>
             {imageUrl ? (
-              <div className="relative inline-block border border-slate-200 rounded-xl overflow-hidden bg-slate-50 p-1">
-                <img
-                  src={imageUrl}
-                  alt="Attachment preview"
-                  className="w-24 h-24 object-cover rounded-lg"
-                />
+              <div className="flex items-center gap-3 p-2 bg-slate-50 border border-slate-300 rounded">
+                <span className="text-xs font-semibold text-emerald-700">Image attached</span>
                 <button
                   type="button"
                   onClick={() => setImageUrl('')}
-                  className="absolute top-2 right-2 bg-rose-600 text-white p-1 rounded-md hover:bg-rose-700 shadow-sm"
-                  title="Remove image"
+                  className="px-2 py-0.5 bg-rose-50 text-rose-700 border border-rose-200 rounded text-xs font-bold cursor-pointer"
                 >
-                  <Trash2 className="w-3.5 h-3.5" />
+                  Remove
                 </button>
               </div>
             ) : (
-              <label className="border border-dashed border-slate-300 hover:border-blue-400 bg-slate-50/50 hover:bg-blue-50/30 rounded-xl p-3 flex items-center justify-center gap-2 cursor-pointer transition-colors text-slate-500">
-                <Upload className="w-4 h-4 text-blue-600" />
-                <span className="font-medium text-[11px]">
-                  {uploading ? 'Uploading photo...' : 'Click to upload photo of issue'}
+              <label className="block border border-dashed border-slate-300 bg-slate-50 p-3 rounded text-center cursor-pointer hover:bg-slate-100">
+                <span className="text-xs text-slate-600 font-semibold">
+                  {uploading ? 'Uploading...' : 'Click to select image file'}
                 </span>
                 <input
                   type="file"
@@ -246,19 +230,18 @@ export function ComplaintFormModal({ isOpen, onClose, onSuccess }) {
             )}
           </div>
 
-          {/* Actions */}
-          <div className="pt-3 border-t border-slate-100 flex items-center justify-end gap-2">
+          <div className="pt-3 border-t border-slate-200 flex items-center justify-end gap-2">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 text-slate-600 hover:bg-slate-100 rounded-xl font-medium transition-colors"
+              className="px-4 py-2 rounded text-slate-600 hover:bg-slate-100 font-bold cursor-pointer"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={submitting || uploading}
-              className="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl shadow-sm transition-all"
+              className="px-5 py-2 bg-sky-600 hover:bg-sky-700 text-white font-bold rounded cursor-pointer"
             >
               {submitting ? 'Submitting...' : 'Submit Report'}
             </button>

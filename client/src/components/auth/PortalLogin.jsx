@@ -1,13 +1,4 @@
 import React, { useState } from 'react';
-import {
-  Wrench,
-  Mail,
-  Lock,
-  GraduationCap,
-  Briefcase,
-  ShieldCheck,
-  ArrowRight
-} from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { DEPARTMENTS } from '../../constants';
 import { useToast } from '../../context/ToastContext';
@@ -99,65 +90,65 @@ export function PortalLogin({ onLoginSuccess }) {
   };
 
   return (
-    <div className="min-h-[80vh] flex items-center justify-center p-4">
-      <div className="max-w-md w-full bg-white rounded-3xl border border-slate-200 p-8 shadow-xl text-slate-800">
+    <div className="min-h-[75vh] flex items-center justify-center p-4">
+      <div className="max-w-md w-full bg-white rounded-2xl border border-slate-300 p-8 shadow-sm text-slate-800">
         
-        {/* Header */}
+        {/* Header - Text Only */}
         <div className="text-center mb-6">
-          <div className="w-12 h-12 bg-blue-600 text-white rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-md shadow-blue-500/20">
-            <Wrench className="w-6 h-6 -rotate-45" />
-          </div>
-          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
-            CampusCare
+          <h1 className="text-2xl font-bold text-slate-900">
+            CampusCare Maintenance
           </h1>
           <p className="text-xs text-slate-500 mt-1">
             College Maintenance Management System
           </p>
         </div>
 
-        {/* Quick Demo Access Bar */}
-        <div className="mb-6 p-3 rounded-2xl bg-slate-50 border border-slate-200 text-center">
-          <span className="text-[11px] font-semibold text-slate-500 block mb-2 uppercase tracking-wider">
+        {/* 1-Click Demo Section - Text Only with 3 Light Colors */}
+        <div className="mb-6 p-4 rounded-xl bg-slate-50 border border-slate-200 text-center">
+          <span className="text-xs font-bold text-slate-600 block mb-2 uppercase tracking-wide">
             Quick 1-Click Demo Login
           </span>
           <div className="grid grid-cols-3 gap-2">
+            
+            {/* Color 1: Light Sky */}
             <button
               type="button"
               onClick={() => handleQuickDemo('student')}
               disabled={loading}
-              className="py-1.5 px-2 bg-white hover:bg-blue-50 border border-slate-200 hover:border-blue-300 rounded-xl text-xs font-semibold text-slate-700 hover:text-blue-600 transition-all flex flex-col items-center gap-1 shadow-2xs"
+              className="py-2 px-2 bg-sky-50 hover:bg-sky-100 border border-sky-200 rounded-lg text-xs font-bold text-sky-800 transition-colors cursor-pointer"
             >
-              <GraduationCap className="w-4 h-4 text-blue-600" />
-              <span>Student</span>
+              Student
             </button>
+
+            {/* Color 2: Light Mint */}
             <button
               type="button"
               onClick={() => handleQuickDemo('faculty')}
               disabled={loading}
-              className="py-1.5 px-2 bg-white hover:bg-emerald-50 border border-slate-200 hover:border-emerald-300 rounded-xl text-xs font-semibold text-slate-700 hover:text-emerald-700 transition-all flex flex-col items-center gap-1 shadow-2xs"
+              className="py-2 px-2 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 rounded-lg text-xs font-bold text-emerald-800 transition-colors cursor-pointer"
             >
-              <Briefcase className="w-4 h-4 text-emerald-600" />
-              <span>Faculty</span>
+              Faculty
             </button>
+
+            {/* Color 3: Light Lavender */}
             <button
               type="button"
               onClick={() => handleQuickDemo('admin')}
               disabled={loading}
-              className="py-1.5 px-2 bg-white hover:bg-purple-50 border border-slate-200 hover:border-purple-300 rounded-xl text-xs font-semibold text-slate-700 hover:text-purple-700 transition-all flex flex-col items-center gap-1 shadow-2xs"
+              className="py-2 px-2 bg-violet-50 hover:bg-violet-100 border border-violet-200 rounded-lg text-xs font-bold text-violet-800 transition-colors cursor-pointer"
             >
-              <ShieldCheck className="w-4 h-4 text-purple-600" />
-              <span>Admin</span>
+              Admin
             </button>
           </div>
         </div>
 
-        {/* Mode Toggle */}
-        <div className="flex bg-slate-100 p-1 rounded-2xl border border-slate-200 text-xs font-semibold mb-6">
+        {/* Tabs - Text Only */}
+        <div className="flex bg-slate-100 p-1 rounded-lg border border-slate-200 text-xs font-bold mb-6">
           <button
             type="button"
             onClick={() => { setMode('login'); setError(''); }}
-            className={`flex-1 py-2 rounded-xl transition-all ${
-              mode === 'login' ? 'bg-white text-slate-900 shadow-xs font-bold' : 'text-slate-500 hover:text-slate-900'
+            className={`flex-1 py-2 rounded transition-colors cursor-pointer ${
+              mode === 'login' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-500 hover:text-slate-900'
             }`}
           >
             Sign In
@@ -165,16 +156,16 @@ export function PortalLogin({ onLoginSuccess }) {
           <button
             type="button"
             onClick={() => { setMode('register'); setError(''); }}
-            className={`flex-1 py-2 rounded-xl transition-all ${
-              mode === 'register' ? 'bg-white text-slate-900 shadow-xs font-bold' : 'text-slate-500 hover:text-slate-900'
+            className={`flex-1 py-2 rounded transition-colors cursor-pointer ${
+              mode === 'register' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-500 hover:text-slate-900'
             }`}
           >
-            Create Account
+            Register Account
           </button>
         </div>
 
         {error && (
-          <div className="mb-4 p-3 bg-rose-50 border border-rose-200 rounded-xl text-xs text-rose-700">
+          <div className="mb-4 p-3 bg-rose-50 border border-rose-200 rounded-lg text-xs text-rose-700 font-medium">
             {error}
           </div>
         )}
@@ -183,90 +174,84 @@ export function PortalLogin({ onLoginSuccess }) {
         {mode === 'login' ? (
           <form onSubmit={handleLoginSubmit} className="space-y-4 text-xs">
             <div>
-              <label className="block text-slate-700 font-medium mb-1">Campus Email</label>
-              <div className="relative">
-                <Mail className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-                <input
-                  type="email"
-                  required
-                  placeholder="name@apexcollege.edu"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-3 py-2.5 text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 font-medium"
-                />
-              </div>
+              <label className="block text-slate-700 font-bold mb-1">Campus Email</label>
+              <input
+                type="email"
+                required
+                placeholder="name@apexcollege.edu"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-slate-800 font-medium focus:outline-none focus:border-sky-500 focus:bg-white"
+              />
             </div>
 
             <div>
-              <label className="block text-slate-700 font-medium mb-1">Password</label>
-              <div className="relative">
-                <Lock className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-                <input
-                  type="password"
-                  required
-                  placeholder="••••••••"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-3 py-2.5 text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 font-medium"
-                />
-              </div>
+              <label className="block text-slate-700 font-bold mb-1">Password</label>
+              <input
+                type="password"
+                required
+                placeholder="Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-slate-800 font-medium focus:outline-none focus:border-sky-500 focus:bg-white"
+              />
             </div>
 
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow-md shadow-blue-500/20 transition-all flex items-center justify-center gap-2 text-sm mt-3"
+              className="w-full py-2.5 bg-sky-600 hover:bg-sky-700 text-white font-bold rounded-lg transition-colors text-sm cursor-pointer"
             >
-              {loading ? 'Authenticating...' : 'Sign In'}
-              <ArrowRight className="w-4 h-4" />
+              {loading ? 'Signing In...' : 'Sign In'}
             </button>
           </form>
         ) : (
           /* Register Form */
           <form onSubmit={handleRegisterSubmit} className="space-y-3 text-xs">
             <div>
-              <label className="block text-slate-700 font-medium mb-1">Full Name *</label>
+              <label className="block text-slate-700 font-bold mb-1">Full Name *</label>
               <input
                 type="text"
                 required
-                placeholder="e.g. John Doe"
+                placeholder="Full Name"
                 value={regName}
                 onChange={(e) => setRegName(e.target.value)}
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-800 font-medium focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                className="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-slate-800 font-medium focus:outline-none focus:border-sky-500 focus:bg-white"
               />
             </div>
 
             <div className="grid grid-cols-2 gap-2">
               <div>
-                <label className="block text-slate-700 font-medium mb-1">Role *</label>
+                <label className="block text-slate-700 font-bold mb-1">Role *</label>
                 <select
                   value={regRole}
                   onChange={(e) => setRegRole(e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-2 text-slate-800 font-medium focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                  className="w-full bg-slate-50 border border-slate-300 rounded-lg px-2 py-2 text-slate-800 font-medium focus:outline-none focus:border-sky-500"
                 >
                   <option value="student">Student</option>
                   <option value="faculty">Faculty</option>
                 </select>
               </div>
+
               <div>
-                <label className="block text-slate-700 font-medium mb-1">Roll / ID No. *</label>
+                <label className="block text-slate-700 font-bold mb-1">ID Number *</label>
                 <input
                   type="text"
                   required
                   placeholder="23CS012"
                   value={regId}
                   onChange={(e) => setRegId(e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-800 font-medium font-mono focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                  className="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-slate-800 font-medium focus:outline-none focus:border-sky-500"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-slate-700 font-medium mb-1">Department *</label>
+              <label className="block text-slate-700 font-bold mb-1">Department *</label>
               <select
                 value={regDept}
                 onChange={(e) => setRegDept(e.target.value)}
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-2 text-slate-800 font-medium focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                className="w-full bg-slate-50 border border-slate-300 rounded-lg px-2 py-2 text-slate-800 font-medium focus:outline-none focus:border-sky-500"
               >
                 {DEPARTMENTS.map(d => (
                   <option key={d} value={d}>{d}</option>
@@ -275,33 +260,33 @@ export function PortalLogin({ onLoginSuccess }) {
             </div>
 
             <div>
-              <label className="block text-slate-700 font-medium mb-1">Campus Email *</label>
+              <label className="block text-slate-700 font-bold mb-1">Campus Email *</label>
               <input
                 type="email"
                 required
                 placeholder="name@apexcollege.edu"
                 value={regEmail}
                 onChange={(e) => setRegEmail(e.target.value)}
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-800 font-medium focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                className="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-slate-800 font-medium focus:outline-none focus:border-sky-500 focus:bg-white"
               />
             </div>
 
             <div>
-              <label className="block text-slate-700 font-medium mb-1">Password *</label>
+              <label className="block text-slate-700 font-bold mb-1">Password *</label>
               <input
                 type="password"
                 required
                 placeholder="At least 6 characters"
                 value={regPassword}
                 onChange={(e) => setRegPassword(e.target.value)}
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-800 font-medium focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                className="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-slate-800 font-medium focus:outline-none focus:border-sky-500 focus:bg-white"
               />
             </div>
 
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow-md shadow-blue-500/20 transition-all flex items-center justify-center gap-2 text-xs mt-2"
+              className="w-full py-2.5 bg-sky-600 hover:bg-sky-700 text-white font-bold rounded-lg transition-colors text-xs cursor-pointer"
             >
               {loading ? 'Creating Account...' : 'Register'}
             </button>

@@ -1,13 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import {
-  Search,
-  Building2,
-  Eye,
-  RefreshCw,
-  Inbox
-} from 'lucide-react';
 import { StatusBadge, PriorityBadge } from '../common/Badges';
-import { CategoryIcon } from '../common/CategoryIcon';
 import { ComplaintDetailModal } from '../complaints/ComplaintDetailModal';
 import { api } from '../../services/api';
 import { useToast } from '../../context/ToastContext';
@@ -60,71 +52,75 @@ export function AdminPortal() {
 
   // Metrics
   const totalCount = complaints.length;
-  const submittedCount = complaints.filter(c => c.status === 'Submitted').length;
-  const inProgressCount = complaints.filter(c => c.status === 'In Progress' || c.status === 'Under Review' || c.status === 'Assigned').length;
+  const submittedCount = complaints.filter(c => c.status === 'Submitted' || c.status === 'Under Review').length;
+  const inProgressCount = complaints.filter(c => c.status === 'In Progress' || c.status === 'Assigned').length;
   const resolvedCount = complaints.filter(c => c.status === 'Resolved').length;
 
   return (
     <div className="space-y-6">
       
-      {/* Top Banner */}
-      <div className="bg-white rounded-2xl border border-slate-200 p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-xs">
+      {/* SECTION 1: Top Banner - Text Only */}
+      <section className="p-6 bg-violet-50 border border-violet-200 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
-            Facilities Management
+          <h1 className="text-2xl font-bold text-slate-900">
+            Facilities Command Center (Admin)
           </h1>
-          <p className="text-xs sm:text-sm text-slate-500 mt-1">
-            Admin Portal — Monitor, update status, and manage campus complaints.
+          <p className="text-xs text-slate-600 mt-1">
+            Overview of all campus maintenance tickets, status updates, and reports.
           </p>
         </div>
 
         <button
           onClick={fetchComplaints}
-          className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium rounded-xl transition-all flex items-center justify-center gap-2 text-xs shrink-0"
+          className="px-4 py-2 bg-white hover:bg-slate-100 text-slate-800 font-bold border border-slate-300 rounded text-xs cursor-pointer"
         >
-          <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
-          Refresh
+          {loading ? 'Refreshing...' : 'Refresh Data'}
         </button>
-      </div>
+      </section>
 
-      {/* 4 Metrics Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs">
-          <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider block">Total</span>
-          <div className="text-2xl font-bold text-slate-900 mt-1">{totalCount}</div>
-          <span className="text-[11px] text-slate-400 mt-0.5 block">All campus requests</span>
+      {/* SECTION 2: 4 Metric Cards - Text Only */}
+      <section className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        
+        {/* Sky Card: Total */}
+        <div className="p-4 bg-sky-50 border border-sky-200 rounded-xl">
+          <div className="text-xs font-bold text-sky-800 uppercase tracking-wide">Total Tickets</div>
+          <div className="text-2xl font-bold text-sky-950 mt-1">{totalCount}</div>
+          <div className="text-[11px] text-sky-700 mt-0.5">All campus requests</div>
         </div>
 
-        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs">
-          <span className="text-xs font-semibold text-amber-600 uppercase tracking-wider block">New / Review</span>
-          <div className="text-2xl font-bold text-amber-600 mt-1">{submittedCount}</div>
-          <span className="text-[11px] text-slate-400 mt-0.5 block">Awaiting action</span>
+        {/* Amber Card: New/Review */}
+        <div className="p-4 bg-amber-50 border border-amber-200 rounded-xl">
+          <div className="text-xs font-bold text-amber-800 uppercase tracking-wide">New / Review</div>
+          <div className="text-2xl font-bold text-amber-950 mt-1">{submittedCount}</div>
+          <div className="text-[11px] text-amber-700 mt-0.5">Awaiting triage</div>
         </div>
 
-        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs">
-          <span className="text-xs font-semibold text-blue-600 uppercase tracking-wider block">In Progress</span>
-          <div className="text-2xl font-bold text-blue-600 mt-1">{inProgressCount}</div>
-          <span className="text-[11px] text-slate-400 mt-0.5 block">Work underway</span>
+        {/* Lavender Card: In Progress */}
+        <div className="p-4 bg-violet-50 border border-violet-200 rounded-xl">
+          <div className="text-xs font-bold text-violet-800 uppercase tracking-wide">In Progress</div>
+          <div className="text-2xl font-bold text-violet-950 mt-1">{inProgressCount}</div>
+          <div className="text-[11px] text-violet-700 mt-0.5">Work underway</div>
         </div>
 
-        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs">
-          <span className="text-xs font-semibold text-emerald-600 uppercase tracking-wider block">Resolved</span>
-          <div className="text-2xl font-bold text-emerald-600 mt-1">{resolvedCount}</div>
-          <span className="text-[11px] text-slate-400 mt-0.5 block">Closed tickets</span>
+        {/* Mint Card: Resolved */}
+        <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-xl">
+          <div className="text-xs font-bold text-emerald-800 uppercase tracking-wide">Resolved</div>
+          <div className="text-2xl font-bold text-emerald-950 mt-1">{resolvedCount}</div>
+          <div className="text-[11px] text-emerald-700 mt-0.5">Closed tickets</div>
         </div>
-      </div>
 
-      {/* Filter and Search Bar */}
-      <div className="bg-white p-3 sm:p-4 rounded-2xl border border-slate-200 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-3">
-        {/* Status Tabs */}
-        <div className="flex items-center gap-1 overflow-x-auto w-full sm:w-auto p-1 bg-slate-100 rounded-xl text-xs font-medium">
+      </section>
+
+      {/* SECTION 3: Filter & Search Bar - Text Only */}
+      <section className="p-4 bg-white border border-slate-200 rounded-xl flex flex-col sm:flex-row items-center justify-between gap-3">
+        <div className="flex items-center gap-1.5 overflow-x-auto w-full sm:w-auto p-1 bg-slate-100 rounded-lg text-xs font-bold">
           {['All', 'Submitted', 'In Progress', 'Resolved'].map((st) => (
             <button
               key={st}
               onClick={() => setStatusFilter(st)}
-              className={`px-3 py-1.5 rounded-lg transition-all whitespace-nowrap ${
+              className={`px-3 py-1 rounded cursor-pointer ${
                 statusFilter === st
-                  ? 'bg-white text-purple-700 shadow-xs font-semibold'
+                  ? 'bg-violet-600 text-white'
                   : 'text-slate-600 hover:text-slate-900'
               }`}
             >
@@ -133,131 +129,117 @@ export function AdminPortal() {
           ))}
         </div>
 
-        {/* Search */}
-        <form onSubmit={handleSearchSubmit} className="relative w-full sm:w-72">
-          <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+        <form onSubmit={handleSearchSubmit} className="w-full sm:w-72 flex gap-2">
           <input
             type="text"
-            placeholder="Search tickets, rooms, reporters..."
+            placeholder="Search tickets..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-9 pr-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:outline-none focus:ring-2 focus:ring-purple-500/20 text-slate-800 placeholder:text-slate-400"
+            className="w-full px-3 py-1.5 bg-slate-50 border border-slate-300 rounded-lg text-xs text-slate-800 focus:outline-none focus:border-violet-500"
           />
+          <button
+            type="submit"
+            className="px-3 py-1.5 bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-bold rounded cursor-pointer"
+          >
+            Search
+          </button>
         </form>
-      </div>
+      </section>
 
-      {/* Complaints Table / List */}
-      {loading ? (
-        <div className="py-16 text-center text-slate-400 text-xs">
-          <div className="w-7 h-7 border-2 border-purple-600 border-t-transparent rounded-full animate-spin mx-auto mb-2" />
-          Loading administrative records...
-        </div>
-      ) : complaints.length === 0 ? (
-        <div className="bg-white rounded-2xl border border-slate-200 p-12 text-center shadow-xs">
-          <div className="w-12 h-12 bg-slate-100 text-slate-400 rounded-xl flex items-center justify-center mx-auto mb-3">
-            <Inbox className="w-6 h-6" />
+      {/* SECTION 4: Complaints Table - Text Only */}
+      <section>
+        {loading ? (
+          <div className="p-12 text-center text-slate-500 text-xs bg-white border border-slate-200 rounded-xl">
+            Loading administrative records...
           </div>
-          <h3 className="font-semibold text-slate-800 text-sm">No complaints found</h3>
-          <p className="text-xs text-slate-400 mt-1">
-            No complaints currently match your active filters.
-          </p>
-        </div>
-      ) : (
-        <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-xs">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse text-xs">
-              <thead>
-                <tr className="bg-slate-50/80 border-b border-slate-200 text-slate-500 uppercase tracking-wider text-[11px] font-semibold">
-                  <th className="py-3 px-4">Ticket ID</th>
-                  <th className="py-3 px-4">Category & Location</th>
-                  <th className="py-3 px-4">Reporter</th>
-                  <th className="py-3 px-4">Priority</th>
-                  <th className="py-3 px-4">Status</th>
-                  <th className="py-3 px-4">Update Status</th>
-                  <th className="py-3 px-4 text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100 font-medium">
-                {complaints.map((c) => (
-                  <tr key={c.complaint_id} className="hover:bg-slate-50/80 transition-colors">
-                    
-                    {/* ID & Date */}
-                    <td className="py-3 px-4">
-                      <span className="font-mono font-semibold text-slate-900 block">
-                        {c.complaint_id}
-                      </span>
-                      <span className="text-[10px] text-slate-400">
-                        {new Date(c.created_date).toLocaleDateString()}
-                      </span>
-                    </td>
-
-                    {/* Category & Location */}
-                    <td className="py-3 px-4">
-                      <div className="flex items-center gap-2">
-                        <CategoryIcon category={c.category} className="w-4 h-4 shrink-0" />
-                        <div>
-                          <div className="font-semibold text-slate-800">{c.category}</div>
-                          <div className="text-[11px] text-slate-400 flex items-center gap-1">
-                            <Building2 className="w-3 h-3" />
-                            {c.building} — {c.room_number}
-                          </div>
-                        </div>
-                      </div>
-                    </td>
-
-                    {/* Reporter */}
-                    <td className="py-3 px-4">
-                      <div className="text-slate-800 font-medium">{c.reporter_name}</div>
-                      <span className={`inline-block text-[10px] px-1.5 py-0.2 rounded font-semibold capitalize ${
-                        c.reporter_role === 'faculty' ? 'text-emerald-700 bg-emerald-50' : 'text-blue-700 bg-blue-50'
-                      }`}>
-                        {c.reporter_role}
-                      </span>
-                    </td>
-
-                    {/* Priority */}
-                    <td className="py-3 px-4">
-                      <PriorityBadge priority={c.priority} size="xs" />
-                    </td>
-
-                    {/* Current Status Badge */}
-                    <td className="py-3 px-4">
-                      <StatusBadge status={c.status} size="xs" />
-                    </td>
-
-                    {/* Quick Status Select */}
-                    <td className="py-3 px-4">
-                      <select
-                        value={c.status}
-                        onChange={(e) => handleStatusChange(c.complaint_id, e.target.value)}
-                        className="bg-slate-50 border border-slate-200 rounded-lg px-2 py-1 text-xs font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-purple-500/20 cursor-pointer"
-                      >
-                        <option value="Submitted">Submitted</option>
-                        <option value="Under Review">Under Review</option>
-                        <option value="In Progress">In Progress</option>
-                        <option value="Resolved">Resolved</option>
-                        <option value="Rejected">Rejected</option>
-                      </select>
-                    </td>
-
-                    {/* Action */}
-                    <td className="py-3 px-4 text-right">
-                      <button
-                        onClick={() => setSelectedComplaintId(c.complaint_id)}
-                        className="px-2.5 py-1 text-blue-600 hover:bg-blue-50 border border-blue-200 rounded-lg text-xs font-semibold inline-flex items-center gap-1 transition-all"
-                      >
-                        <Eye className="w-3 h-3" />
-                        Details
-                      </button>
-                    </td>
-
+        ) : complaints.length === 0 ? (
+          <div className="p-12 text-center bg-white border border-slate-200 rounded-xl text-slate-600">
+            <h3 className="font-bold text-sm">No complaints found</h3>
+            <p className="text-xs text-slate-400 mt-1">
+              No tickets matched the current filter criteria.
+            </p>
+          </div>
+        ) : (
+          <div className="bg-white border border-slate-200 rounded-xl overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse text-xs">
+                <thead>
+                  <tr className="bg-slate-50 border-b border-slate-200 text-slate-600 uppercase text-[11px] font-bold">
+                    <th className="py-3 px-4">Ticket ID</th>
+                    <th className="py-3 px-4">Category & Location</th>
+                    <th className="py-3 px-4">Reporter</th>
+                    <th className="py-3 px-4">Priority</th>
+                    <th className="py-3 px-4">Status</th>
+                    <th className="py-3 px-4">Change Status</th>
+                    <th className="py-3 px-4 text-right">Action</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="divide-y divide-slate-100 font-medium">
+                  {complaints.map((c) => (
+                    <tr key={c.complaint_id} className="hover:bg-slate-50">
+                      
+                      <td className="py-3 px-4">
+                        <span className="font-mono font-bold text-violet-700 block">
+                          {c.complaint_id}
+                        </span>
+                        <span className="text-[10px] text-slate-400">
+                          {new Date(c.created_date).toLocaleDateString()}
+                        </span>
+                      </td>
+
+                      <td className="py-3 px-4">
+                        <div className="font-bold text-slate-900">{c.category}</div>
+                        <div className="text-[11px] text-slate-500 mt-0.5">
+                          {c.building} - {c.room_number}
+                        </div>
+                      </td>
+
+                      <td className="py-3 px-4">
+                        <div className="text-slate-800">{c.reporter_name}</div>
+                        <span className="text-[10px] font-bold uppercase text-slate-500">
+                          Role: {c.reporter_role}
+                        </span>
+                      </td>
+
+                      <td className="py-3 px-4">
+                        <PriorityBadge priority={c.priority} size="xs" />
+                      </td>
+
+                      <td className="py-3 px-4">
+                        <StatusBadge status={c.status} size="xs" />
+                      </td>
+
+                      <td className="py-3 px-4">
+                        <select
+                          value={c.status}
+                          onChange={(e) => handleStatusChange(c.complaint_id, e.target.value)}
+                          className="bg-slate-50 border border-slate-300 rounded px-2 py-1 text-xs font-semibold text-slate-800 focus:outline-none focus:border-violet-500 cursor-pointer"
+                        >
+                          <option value="Submitted">Submitted</option>
+                          <option value="Under Review">Under Review</option>
+                          <option value="In Progress">In Progress</option>
+                          <option value="Resolved">Resolved</option>
+                          <option value="Rejected">Rejected</option>
+                        </select>
+                      </td>
+
+                      <td className="py-3 px-4 text-right">
+                        <button
+                          onClick={() => setSelectedComplaintId(c.complaint_id)}
+                          className="px-3 py-1 bg-violet-50 text-violet-700 border border-violet-200 hover:bg-violet-100 rounded text-xs font-bold cursor-pointer"
+                        >
+                          Details
+                        </button>
+                      </td>
+
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
-        </div>
-      )}
+        )}
+      </section>
 
       {/* Complaint Detail Modal */}
       <ComplaintDetailModal

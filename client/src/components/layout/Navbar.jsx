@@ -1,6 +1,5 @@
 import React from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { Wrench, LogOut, GraduationCap, Briefcase, ShieldCheck } from 'lucide-react';
 import { useToast } from '../../context/ToastContext';
 
 export function Navbar() {
@@ -16,97 +15,86 @@ export function Navbar() {
     }
   };
 
-  const getRoleBadge = (role) => {
+  const getRoleStyle = (role) => {
     switch (role) {
       case 'admin':
-        return { label: 'Admin', color: 'bg-purple-100 text-purple-700 border-purple-200', icon: ShieldCheck };
+        return 'bg-violet-100 text-violet-800 border-violet-300';
       case 'faculty':
-        return { label: 'Faculty', color: 'bg-emerald-100 text-emerald-700 border-emerald-200', icon: Briefcase };
+        return 'bg-emerald-100 text-emerald-800 border-emerald-300';
       default:
-        return { label: 'Student', color: 'bg-blue-100 text-blue-700 border-blue-200', icon: GraduationCap };
+        return 'bg-sky-100 text-sky-800 border-sky-300';
     }
   };
 
-  const roleInfo = getRoleBadge(user?.role);
-  const RoleIcon = roleInfo.icon;
-
   return (
-    <header className="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-slate-200 transition-colors">
+    <header className="bg-white border-b border-slate-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
         
-        {/* Brand */}
+        {/* Brand - Text Only */}
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-blue-600 text-white flex items-center justify-center shadow-sm">
-            <Wrench className="w-5 h-5 -rotate-45" />
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="font-bold text-slate-900 tracking-tight text-base sm:text-lg">
-                CampusCare
-              </span>
-              <span className="hidden sm:inline-block text-[11px] font-semibold uppercase tracking-wider text-slate-500 bg-slate-100 px-2 py-0.5 rounded-md border border-slate-200">
-                Maintenance
-              </span>
-            </div>
-          </div>
+          <span className="font-bold text-xl text-slate-900 tracking-tight">
+            CampusCare
+          </span>
+          <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 bg-slate-100 px-2 py-0.5 rounded border border-slate-200">
+            Maintenance
+          </span>
         </div>
 
-        {/* Right Controls */}
-        <div className="flex items-center gap-2 sm:gap-4">
+        {/* Right Navigation Controls */}
+        <div className="flex items-center gap-3">
           
-          {/* Quick Demo Role Switcher for instant testing */}
-          <div className="hidden md:flex items-center gap-1 bg-slate-100 p-1 rounded-xl border border-slate-200 text-xs">
-            <span className="text-[11px] text-slate-400 font-medium px-2">Switch demo:</span>
+          {/* Quick Demo Role Switcher - Text Only */}
+          <div className="hidden sm:flex items-center gap-1.5 p-1 rounded-lg bg-slate-100 border border-slate-200 text-xs">
+            <span className="text-slate-500 font-medium px-2">Role:</span>
             <button
               onClick={() => handleRoleSwitch('student')}
-              className={`px-2.5 py-1 rounded-lg font-medium transition-all ${
-                user?.role === 'student' ? 'bg-white text-blue-700 shadow-xs font-semibold' : 'text-slate-600 hover:text-slate-900'
+              className={`px-3 py-1 rounded font-semibold cursor-pointer ${
+                user?.role === 'student'
+                  ? 'bg-sky-600 text-white'
+                  : 'text-slate-700 hover:bg-white'
               }`}
             >
               Student
             </button>
             <button
               onClick={() => handleRoleSwitch('faculty')}
-              className={`px-2.5 py-1 rounded-lg font-medium transition-all ${
-                user?.role === 'faculty' ? 'bg-white text-emerald-700 shadow-xs font-semibold' : 'text-slate-600 hover:text-slate-900'
+              className={`px-3 py-1 rounded font-semibold cursor-pointer ${
+                user?.role === 'faculty'
+                  ? 'bg-emerald-600 text-white'
+                  : 'text-slate-700 hover:bg-white'
               }`}
             >
               Faculty
             </button>
             <button
               onClick={() => handleRoleSwitch('admin')}
-              className={`px-2.5 py-1 rounded-lg font-medium transition-all ${
-                user?.role === 'admin' ? 'bg-white text-purple-700 shadow-xs font-semibold' : 'text-slate-600 hover:text-slate-900'
+              className={`px-3 py-1 rounded font-semibold cursor-pointer ${
+                user?.role === 'admin'
+                  ? 'bg-violet-600 text-white'
+                  : 'text-slate-700 hover:bg-white'
               }`}
             >
               Admin
             </button>
           </div>
 
-          {/* Active User info */}
-          <div className="flex items-center gap-2 pl-2">
-            <div className="text-right hidden sm:block">
-              <div className="text-xs font-semibold text-slate-800 leading-tight">
-                {user?.name}
-              </div>
-              <div className="text-[10px] text-slate-400">
-                {user?.department || user?.email}
-              </div>
-            </div>
-
-            <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold border ${roleInfo.color}`}>
-              <RoleIcon className="w-3.5 h-3.5" />
-              <span>{roleInfo.label}</span>
-            </span>
+          {/* User Details */}
+          <div className="text-right hidden md:block">
+            <div className="text-xs font-bold text-slate-800">{user?.name}</div>
+            <div className="text-[10px] text-slate-500">{user?.department || user?.email}</div>
           </div>
 
-          {/* Sign Out Button */}
+          {/* Current Role Badge */}
+          <span className={`px-2.5 py-1 rounded text-xs font-bold uppercase border ${getRoleStyle(user?.role)}`}>
+            {user?.role}
+          </span>
+
+          {/* Sign Out Button - Text Only */}
           <button
             onClick={logout}
-            title="Sign Out"
-            className="p-2 text-slate-500 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all border border-transparent hover:border-rose-200"
+            className="px-3 py-1 text-xs font-semibold text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 rounded cursor-pointer"
           >
-            <LogOut className="w-4 h-4" />
+            Sign Out
           </button>
 
         </div>

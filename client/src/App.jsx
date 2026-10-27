@@ -12,21 +12,20 @@ function MainApp() {
   if (loading) {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
-        <div className="text-center">
-          <div className="w-10 h-10 border-3 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-3" />
-          <p className="text-sm font-semibold text-slate-700">Loading CampusCare...</p>
+        <div className="text-center p-6 bg-white border border-slate-200 rounded-lg">
+          <p className="text-sm font-bold text-slate-700">Loading CampusCare...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-50 text-slate-900">
+    <div className="min-h-screen flex flex-col bg-slate-50 text-slate-800">
       
-      {/* Top Navbar: only visible if user is logged in */}
+      {/* Top Navbar */}
       {user && <Navbar />}
 
-      {/* Main Content Area */}
+      {/* Main Content Sections */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
         {!user ? (
           <PortalLogin />
@@ -37,10 +36,11 @@ function MainApp() {
         )}
       </main>
 
-      {/* Minimal Clean Footer */}
-      <footer className="mt-auto py-6 border-t border-slate-200/80 bg-white text-center text-xs text-slate-400">
-        <div className="max-w-7xl mx-auto px-4">
-          &copy; {new Date().getFullYear()} CampusCare &bull; College Maintenance System
+      {/* Clean Light Footer - Text Only */}
+      <footer className="bg-white border-t border-slate-200 py-4 text-center text-xs text-slate-500">
+        <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
+          <div>Campus Facilities Network - Live Status Active</div>
+          <div>Copyright {new Date().getFullYear()} CampusCare Maintenance System</div>
         </div>
       </footer>
 

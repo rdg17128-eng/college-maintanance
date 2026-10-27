@@ -1,27 +1,35 @@
 # CampusCare - College Maintenance Management System
 
-A streamlined, modern web application for college campuses allowing students, faculty, and administrators to report, manage, and track maintenance issues efficiently.
+A streamlined web application for college campuses allowing students, faculty, and administrators to report, manage, and track maintenance issues efficiently. Built with the **MERN** stack and standard **HTML** & **CSS**.
 
 ## Features
 
-- **Simple & Intuitive UI**: Clean, uncluttered design focused on speed, clarity, and ease of use.
+- **Simple & Intuitive UI**: Clean, responsive user interface built using HTML and CSS for clarity and ease of use.
 - **Role-Based Portals**:
   - **Student / Faculty Portal**: Quick complaint filing (Category, Building, Room, Floor, Priority, Description, and photo upload), personal ticket dashboard, and status tracking.
-  - **Admin Portal**: Complete overview of all campus tickets, live metric cards, search & status filters, and instant status updates (Submitted → In Progress → Resolved).
+  - **Admin Portal**: Complete overview of all campus tickets, metric summary cards, search & status filters, and instant status updates (Submitted → In Progress → Resolved).
 - **One-Click Demo Access**: Instant pre-filled logins for testing as Student, Faculty, or Admin.
 - **Issue Tracking & Details**: Modal with complaint metadata, attached photos, and timeline history.
-- **RESTful API**: Node.js & Express backend with SQLite persistence and file upload support.
+- **RESTful API**: Node.js & Express backend with MongoDB database integration and file upload support.
 
-## Tech Stack
+## Tech Stack (MERN)
 
-- **Frontend**: React 19, Vite, Tailwind CSS v4, Lucide React icons
-- **Backend**: Node.js, Express, SQLite3, Multer, JWT, BcryptJS
+- **Frontend**:
+  - **HTML5** & **CSS3** (Structure, Responsive Styling, and Layouts)
+  - **JavaScript**
+  - **React.js** (Component-based User Interface)
+- **Backend**:
+  - **Node.js** (Runtime Environment)
+  - **Express.js** (REST API & Routing)
+- **Database**:
+  - **MongoDB** (NoSQL Database for Complaint and User Records)
 
 ## Getting Started
 
 ### Prerequisites
 
 - Node.js (v18 or higher recommended)
+- MongoDB
 - npm
 
 ### Installation
@@ -49,12 +57,12 @@ A streamlined, modern web application for college campuses allowing students, fa
 
 ### Running Locally
 
-Run both server and frontend client concurrently:
+Run both the backend server and frontend client concurrently:
 ```bash
 npm run dev
 ```
 
-- **Frontend UI**: http://localhost:5173
+- **Frontend Client**: http://localhost:5173
 - **Backend API**: http://localhost:5000/api
 
 ### Demo Credentials
@@ -70,3 +78,4 @@ npm run dev
 ## License
 
 ISC
+
