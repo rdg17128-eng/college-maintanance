@@ -7,7 +7,7 @@ export function PortalLogin({ onLoginSuccess }) {
   const { login, register } = useAuth();
   const { addToast } = useToast();
 
-  const [mode, setMode] = useState('login'); // 'login' | 'register'
+  const [mode, setMode] = useState('login');
 
   // Login form state
   const [email, setEmail] = useState('student@apexcollege.edu');
@@ -90,65 +90,59 @@ export function PortalLogin({ onLoginSuccess }) {
   };
 
   return (
-    <div className="min-h-[75vh] flex items-center justify-center p-4">
-      <div className="max-w-md w-full bg-white rounded-2xl border border-slate-300 p-8 shadow-sm text-slate-800">
+    <div className="min-h-[75vh] flex items-center justify-center p-4 bg-white">
+      <div className="max-w-md w-full bg-white rounded-xl border border-sky-300 p-8 shadow-sm text-black">
         
-        {/* Header - Text Only */}
+        {/* Header */}
         <div className="text-center mb-6">
-          <h1 className="text-2xl font-bold text-slate-900">
+          <h1 className="text-2xl font-bold text-black">
             CampusCare Maintenance
           </h1>
-          <p className="text-xs text-slate-500 mt-1">
+          <p className="text-xs text-black mt-1">
             College Maintenance Management System
           </p>
         </div>
 
-        {/* 1-Click Demo Section - Text Only with 3 Light Colors */}
-        <div className="mb-6 p-4 rounded-xl bg-slate-50 border border-slate-200 text-center">
-          <span className="text-xs font-bold text-slate-600 block mb-2 uppercase tracking-wide">
+        {/* 1-Click Demo Section - Sky Blue and White Only */}
+        <div className="mb-6 p-4 rounded-lg bg-sky-50 border border-sky-300 text-center">
+          <span className="text-xs font-bold text-black block mb-2 uppercase tracking-wide">
             Quick 1-Click Demo Login
           </span>
           <div className="grid grid-cols-3 gap-2">
-            
-            {/* Color 1: Light Sky */}
             <button
               type="button"
               onClick={() => handleQuickDemo('student')}
               disabled={loading}
-              className="py-2 px-2 bg-sky-50 hover:bg-sky-100 border border-sky-200 rounded-lg text-xs font-bold text-sky-800 transition-colors cursor-pointer"
+              className="py-2 px-2 bg-white hover:bg-sky-100 border border-sky-400 rounded text-xs font-bold text-black transition-colors cursor-pointer"
             >
               Student
             </button>
-
-            {/* Color 2: Light Mint */}
             <button
               type="button"
               onClick={() => handleQuickDemo('faculty')}
               disabled={loading}
-              className="py-2 px-2 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 rounded-lg text-xs font-bold text-emerald-800 transition-colors cursor-pointer"
+              className="py-2 px-2 bg-white hover:bg-sky-100 border border-sky-400 rounded text-xs font-bold text-black transition-colors cursor-pointer"
             >
               Faculty
             </button>
-
-            {/* Color 3: Light Lavender */}
             <button
               type="button"
               onClick={() => handleQuickDemo('admin')}
               disabled={loading}
-              className="py-2 px-2 bg-violet-50 hover:bg-violet-100 border border-violet-200 rounded-lg text-xs font-bold text-violet-800 transition-colors cursor-pointer"
+              className="py-2 px-2 bg-white hover:bg-sky-100 border border-sky-400 rounded text-xs font-bold text-black transition-colors cursor-pointer"
             >
               Admin
             </button>
           </div>
         </div>
 
-        {/* Tabs - Text Only */}
-        <div className="flex bg-slate-100 p-1 rounded-lg border border-slate-200 text-xs font-bold mb-6">
+        {/* Tabs */}
+        <div className="flex bg-sky-50 p-1 rounded border border-sky-200 text-xs font-bold mb-6">
           <button
             type="button"
             onClick={() => { setMode('login'); setError(''); }}
-            className={`flex-1 py-2 rounded transition-colors cursor-pointer ${
-              mode === 'login' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-500 hover:text-slate-900'
+            className={`flex-1 py-2 rounded cursor-pointer ${
+              mode === 'login' ? 'bg-sky-500 text-white font-bold' : 'text-black hover:bg-sky-100'
             }`}
           >
             Sign In
@@ -156,8 +150,8 @@ export function PortalLogin({ onLoginSuccess }) {
           <button
             type="button"
             onClick={() => { setMode('register'); setError(''); }}
-            className={`flex-1 py-2 rounded transition-colors cursor-pointer ${
-              mode === 'register' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-500 hover:text-slate-900'
+            className={`flex-1 py-2 rounded cursor-pointer ${
+              mode === 'register' ? 'bg-sky-500 text-white font-bold' : 'text-black hover:bg-sky-100'
             }`}
           >
             Register Account
@@ -165,7 +159,7 @@ export function PortalLogin({ onLoginSuccess }) {
         </div>
 
         {error && (
-          <div className="mb-4 p-3 bg-rose-50 border border-rose-200 rounded-lg text-xs text-rose-700 font-medium">
+          <div className="mb-4 p-3 bg-white border border-black rounded text-xs text-black font-semibold">
             {error}
           </div>
         )}
@@ -174,33 +168,33 @@ export function PortalLogin({ onLoginSuccess }) {
         {mode === 'login' ? (
           <form onSubmit={handleLoginSubmit} className="space-y-4 text-xs">
             <div>
-              <label className="block text-slate-700 font-bold mb-1">Campus Email</label>
+              <label className="block text-black font-bold mb-1">Campus Email</label>
               <input
                 type="email"
                 required
                 placeholder="name@apexcollege.edu"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-slate-800 font-medium focus:outline-none focus:border-sky-500 focus:bg-white"
+                className="w-full bg-white border border-sky-300 rounded px-3 py-2 text-black font-medium focus:outline-none focus:border-sky-600"
               />
             </div>
 
             <div>
-              <label className="block text-slate-700 font-bold mb-1">Password</label>
+              <label className="block text-black font-bold mb-1">Password</label>
               <input
                 type="password"
                 required
                 placeholder="Password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-slate-800 font-medium focus:outline-none focus:border-sky-500 focus:bg-white"
+                className="w-full bg-white border border-sky-300 rounded px-3 py-2 text-black font-medium focus:outline-none focus:border-sky-600"
               />
             </div>
 
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-2.5 bg-sky-600 hover:bg-sky-700 text-white font-bold rounded-lg transition-colors text-sm cursor-pointer"
+              className="w-full py-2.5 bg-sky-500 hover:bg-sky-600 text-white font-bold rounded transition-colors text-sm cursor-pointer"
             >
               {loading ? 'Signing In...' : 'Sign In'}
             </button>
@@ -209,24 +203,24 @@ export function PortalLogin({ onLoginSuccess }) {
           /* Register Form */
           <form onSubmit={handleRegisterSubmit} className="space-y-3 text-xs">
             <div>
-              <label className="block text-slate-700 font-bold mb-1">Full Name *</label>
+              <label className="block text-black font-bold mb-1">Full Name *</label>
               <input
                 type="text"
                 required
                 placeholder="Full Name"
                 value={regName}
                 onChange={(e) => setRegName(e.target.value)}
-                className="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-slate-800 font-medium focus:outline-none focus:border-sky-500 focus:bg-white"
+                className="w-full bg-white border border-sky-300 rounded px-3 py-2 text-black font-medium focus:outline-none focus:border-sky-600"
               />
             </div>
 
             <div className="grid grid-cols-2 gap-2">
               <div>
-                <label className="block text-slate-700 font-bold mb-1">Role *</label>
+                <label className="block text-black font-bold mb-1">Role *</label>
                 <select
                   value={regRole}
                   onChange={(e) => setRegRole(e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-300 rounded-lg px-2 py-2 text-slate-800 font-medium focus:outline-none focus:border-sky-500"
+                  className="w-full bg-white border border-sky-300 rounded px-2 py-2 text-black font-medium focus:outline-none focus:border-sky-600"
                 >
                   <option value="student">Student</option>
                   <option value="faculty">Faculty</option>
@@ -234,24 +228,24 @@ export function PortalLogin({ onLoginSuccess }) {
               </div>
 
               <div>
-                <label className="block text-slate-700 font-bold mb-1">ID Number *</label>
+                <label className="block text-black font-bold mb-1">ID Number *</label>
                 <input
                   type="text"
                   required
                   placeholder="23CS012"
                   value={regId}
                   onChange={(e) => setRegId(e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-slate-800 font-medium focus:outline-none focus:border-sky-500"
+                  className="w-full bg-white border border-sky-300 rounded px-3 py-2 text-black font-medium focus:outline-none focus:border-sky-600"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-slate-700 font-bold mb-1">Department *</label>
+              <label className="block text-black font-bold mb-1">Department *</label>
               <select
                 value={regDept}
                 onChange={(e) => setRegDept(e.target.value)}
-                className="w-full bg-slate-50 border border-slate-300 rounded-lg px-2 py-2 text-slate-800 font-medium focus:outline-none focus:border-sky-500"
+                className="w-full bg-white border border-sky-300 rounded px-2.5 py-2 text-black font-medium focus:outline-none focus:border-sky-600"
               >
                 {DEPARTMENTS.map(d => (
                   <option key={d} value={d}>{d}</option>
@@ -260,33 +254,33 @@ export function PortalLogin({ onLoginSuccess }) {
             </div>
 
             <div>
-              <label className="block text-slate-700 font-bold mb-1">Campus Email *</label>
+              <label className="block text-black font-bold mb-1">Campus Email *</label>
               <input
                 type="email"
                 required
                 placeholder="name@apexcollege.edu"
                 value={regEmail}
                 onChange={(e) => setRegEmail(e.target.value)}
-                className="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-slate-800 font-medium focus:outline-none focus:border-sky-500 focus:bg-white"
+                className="w-full bg-white border border-sky-300 rounded px-3 py-2 text-black font-medium focus:outline-none focus:border-sky-600"
               />
             </div>
 
             <div>
-              <label className="block text-slate-700 font-bold mb-1">Password *</label>
+              <label className="block text-black font-bold mb-1">Password *</label>
               <input
                 type="password"
                 required
                 placeholder="At least 6 characters"
                 value={regPassword}
                 onChange={(e) => setRegPassword(e.target.value)}
-                className="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-slate-800 font-medium focus:outline-none focus:border-sky-500 focus:bg-white"
+                className="w-full bg-white border border-sky-300 rounded px-3 py-2 text-black font-medium focus:outline-none focus:border-sky-600"
               />
             </div>
 
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-2.5 bg-sky-600 hover:bg-sky-700 text-white font-bold rounded-lg transition-colors text-xs cursor-pointer"
+              className="w-full py-2.5 bg-sky-500 hover:bg-sky-600 text-white font-bold rounded transition-colors text-xs cursor-pointer"
             >
               {loading ? 'Creating Account...' : 'Register'}
             </button>
