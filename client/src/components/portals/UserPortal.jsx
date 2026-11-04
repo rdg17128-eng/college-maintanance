@@ -47,85 +47,60 @@ export function UserPortal() {
   const resolvedCount = complaints.filter(c => c.status === 'Resolved').length;
 
   return (
-    <div className="space-y-6 bg-white text-black">
+    <div className="space-y-6 animate-fade-in">
       
-      {/* SECTION 1: Header Banner - Sky Blue Background, Black Text */}
-      <section className="p-6 bg-sky-100 border border-sky-300 rounded-lg flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div className="flex items-center gap-4">
-          <div className="w-20 h-20 rounded-full border-3 border-sky-400 bg-white flex items-center justify-center p-2 overflow-hidden shrink-0 shadow-sm">
-            <img src="/logo.png" alt="CampusCare Logo" className="w-full h-full object-contain" />
-          </div>
-          <div>
-            <h1 className="text-2xl font-bold text-black">
-              Maintenance Dashboard
-            </h1>
-            <p className="text-xs text-black mt-1">
-              Welcome, <span className="font-bold">{user?.name}</span>. Report campus maintenance issues or view status.
-            </p>
-          </div>
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2">
+        <div>
+          <h1 className="text-xl font-bold text-slate-900">
+            Maintenance Dashboard
+          </h1>
+          <p className="text-xs text-slate-500 mt-0.5">
+            Welcome back, <span className="font-semibold text-slate-700">{user?.name}</span>. Track issues and report repairs.
+          </p>
         </div>
 
         <button
           onClick={() => setIsFormOpen(true)}
-          className="px-5 py-2.5 bg-sky-500 hover:bg-sky-600 text-white font-bold rounded text-xs cursor-pointer"
+          className="inline-flex items-center justify-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg text-xs shadow-xs transition-colors cursor-pointer"
           id="report-issue-btn"
         >
           + Report Issue
         </button>
-      </section>
+      </div>
 
-      {/* SECTION 2: 3 Metric Cards - All Sky Blue Themed */}
-      <section className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        
-        <div className="p-5 bg-sky-50 border border-sky-300 rounded-lg">
-          <div className="text-xs font-bold text-black uppercase tracking-wider">
-            Total Tickets
-          </div>
-          <div className="text-3xl font-bold text-black mt-2">
-            {complaints.length}
-          </div>
-          <div className="text-[11px] text-black mt-1">
-            All submitted requests
-          </div>
+      {/* Metric Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <div className="p-4 bg-white border border-slate-200 rounded-lg shadow-2xs">
+          <div className="text-xs font-medium text-slate-500">Total Tickets</div>
+          <div className="text-2xl font-bold text-slate-900 mt-1">{complaints.length}</div>
+          <div className="text-[11px] text-slate-400 mt-0.5">Submitted requests</div>
         </div>
 
-        <div className="p-5 bg-sky-50 border border-sky-300 rounded-lg">
-          <div className="text-xs font-bold text-black uppercase tracking-wider">
-            In Progress
-          </div>
-          <div className="text-3xl font-bold text-black mt-2">
-            {activeCount}
-          </div>
-          <div className="text-[11px] text-black mt-1">
-            Work currently ongoing
-          </div>
+        <div className="p-4 bg-white border border-slate-200 rounded-lg shadow-2xs">
+          <div className="text-xs font-medium text-slate-500">In Progress</div>
+          <div className="text-2xl font-bold text-purple-600 mt-1">{activeCount}</div>
+          <div className="text-[11px] text-slate-400 mt-0.5">Currently being repaired</div>
         </div>
 
-        <div className="p-5 bg-sky-50 border border-sky-300 rounded-lg">
-          <div className="text-xs font-bold text-black uppercase tracking-wider">
-            Resolved
-          </div>
-          <div className="text-3xl font-bold text-black mt-2">
-            {resolvedCount}
-          </div>
-          <div className="text-[11px] text-black mt-1">
-            Successfully completed
-          </div>
+        <div className="p-4 bg-white border border-slate-200 rounded-lg shadow-2xs">
+          <div className="text-xs font-medium text-slate-500">Resolved</div>
+          <div className="text-2xl font-bold text-emerald-600 mt-1">{resolvedCount}</div>
+          <div className="text-[11px] text-slate-400 mt-0.5">Successfully closed</div>
         </div>
+      </div>
 
-      </section>
-
-      {/* SECTION 3: Filter & Search Bar - Sky Blue and White */}
-      <section className="p-4 bg-white border border-sky-300 rounded-lg flex flex-col sm:flex-row items-center justify-between gap-3">
-        <div className="flex items-center gap-1.5 overflow-x-auto w-full sm:w-auto p-1 bg-sky-50 border border-sky-200 rounded text-xs font-bold">
+      {/* Filter & Search Bar */}
+      <div className="bg-white border border-slate-200 rounded-lg p-3 flex flex-col sm:flex-row items-center justify-between gap-3 shadow-2xs">
+        <div className="flex items-center gap-1.5 overflow-x-auto w-full sm:w-auto">
           {['All', 'Submitted', 'In Progress', 'Resolved'].map((st) => (
             <button
               key={st}
               onClick={() => setStatusFilter(st)}
-              className={`px-3 py-1 rounded cursor-pointer ${
+              className={`px-3 py-1 rounded-md text-xs font-medium transition-colors cursor-pointer ${
                 statusFilter === st
-                  ? 'bg-sky-500 text-white'
-                  : 'text-black hover:bg-sky-100'
+                  ? 'bg-slate-900 text-white'
+                  : 'text-slate-600 hover:bg-slate-100'
               }`}
             >
               {st}
@@ -139,48 +114,48 @@ export function UserPortal() {
             placeholder="Search complaints..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full px-3 py-1.5 bg-white border border-sky-300 rounded text-xs text-black focus:outline-none focus:border-sky-600"
+            className="w-full px-3 py-1.5 bg-white border border-slate-300 rounded-md text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-blue-500 transition-colors"
           />
           <button
             type="submit"
-            className="px-3 py-1.5 bg-sky-500 hover:bg-sky-600 text-white text-xs font-bold rounded cursor-pointer"
+            className="px-3 py-1.5 bg-slate-800 hover:bg-slate-900 text-white text-xs font-medium rounded-md transition-colors cursor-pointer"
           >
             Search
           </button>
         </form>
-      </section>
+      </div>
 
-      {/* SECTION 4: Complaints Feed */}
+      {/* Complaints List / Grid */}
       <section>
         {loading ? (
-          <div className="p-12 text-center text-black text-xs bg-white border border-sky-300 rounded-lg">
-            Loading complaints data...
+          <div className="p-12 text-center text-slate-500 text-xs bg-white border border-slate-200 rounded-lg">
+            Loading complaints...
           </div>
         ) : complaints.length === 0 ? (
-          <div className="p-12 text-center bg-white border border-sky-300 rounded-lg text-black">
-            <h3 className="font-bold text-sm">No complaints found</h3>
-            <p className="text-xs text-black mt-1">
+          <div className="p-12 text-center bg-white border border-slate-200 rounded-lg">
+            <h3 className="font-semibold text-sm text-slate-800">No complaints found</h3>
+            <p className="text-xs text-slate-500 mt-1">
               There are no records matching your current filter.
             </p>
             <button
               onClick={() => setIsFormOpen(true)}
-              className="mt-4 px-4 py-2 bg-sky-500 hover:bg-sky-600 text-white text-xs font-bold rounded cursor-pointer"
+              className="mt-4 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded-md transition-colors cursor-pointer"
             >
               Report New Issue
             </button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {complaints.map((item) => (
               <div
                 key={item.complaint_id}
                 onClick={() => setSelectedComplaintId(item.complaint_id)}
-                className="bg-white border border-sky-300 hover:border-sky-500 p-5 rounded-lg cursor-pointer transition-colors flex flex-col justify-between"
+                className="bg-white border border-slate-200 hover:border-slate-300 hover:shadow-2xs p-4 rounded-lg cursor-pointer transition-all flex flex-col justify-between"
               >
                 <div>
                   <div className="flex items-center justify-between gap-2 mb-2">
-                    <span className="font-mono text-xs font-bold text-black bg-sky-100 px-2 py-0.5 rounded border border-sky-300">
-                      ID: {item.complaint_id}
+                    <span className="font-mono text-xs font-semibold text-slate-500 bg-slate-100 px-2 py-0.5 rounded">
+                      #{item.complaint_id}
                     </span>
                     <div className="flex gap-1.5">
                       <StatusBadge status={item.status} size="xs" />
@@ -188,28 +163,28 @@ export function UserPortal() {
                     </div>
                   </div>
 
-                  <h3 className="text-sm font-bold text-black mt-2">
-                    {item.category} - Room {item.room_number}
+                  <h3 className="text-sm font-semibold text-slate-900 mt-1">
+                    {item.category} • Room {item.room_number}
                   </h3>
-                  <div className="text-xs text-black mt-0.5">
-                    Building: {item.building} | Floor: {item.floor}
+                  <div className="text-xs text-slate-500 mt-0.5">
+                    {item.building} ({item.floor})
                   </div>
 
-                  <p className="text-xs text-black mt-2 line-clamp-2">
+                  <p className="text-xs text-slate-600 mt-2 line-clamp-2">
                     {item.description}
                   </p>
 
                   {item.resolution_remarks && (
-                    <div className="mt-2.5 p-2 bg-sky-50 border border-sky-300 rounded text-[11px] text-black">
+                    <div className="mt-2.5 p-2 bg-emerald-50 border border-emerald-100 rounded text-[11px] text-emerald-800">
                       <strong>Resolution Note:</strong> {item.resolution_remarks}
                     </div>
                   )}
                 </div>
 
-                <div className="mt-4 pt-3 border-t border-sky-200 flex items-center justify-between text-[11px] text-black">
-                  <span>Date: {new Date(item.created_date).toLocaleDateString()}</span>
-                  <span className="text-sky-600 font-bold hover:underline">
-                    View Details &gt;&gt;
+                <div className="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-400">
+                  <span>Reported: {new Date(item.created_date).toLocaleDateString()}</span>
+                  <span className="text-blue-600 font-medium hover:underline">
+                    View Details →
                   </span>
                 </div>
               </div>

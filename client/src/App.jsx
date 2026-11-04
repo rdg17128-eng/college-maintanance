@@ -11,16 +11,16 @@ function MainApp() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-white text-black flex items-center justify-center p-4">
-        <div className="text-center p-6 border border-sky-300 rounded bg-white">
-          <p className="text-sm font-bold text-black">Loading CampusCare...</p>
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
+        <div className="text-center p-4 text-slate-500 text-xs font-medium">
+          Loading CampusCare...
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-white text-black">
+    <div className="min-h-screen flex flex-col bg-slate-50 text-slate-800">
       
       {/* Top Navbar */}
       {user && <Navbar />}
@@ -36,11 +36,11 @@ function MainApp() {
         )}
       </main>
 
-      {/* Footer */}
-      <footer className="bg-white border-t border-sky-200 py-4 text-center text-xs text-black">
-        <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
-          <div>Campus Facilities Network - Live Status Active</div>
-          <div>Copyright {new Date().getFullYear()} CampusCare Maintenance System</div>
+      {/* Clean Simple Footer */}
+      <footer className="bg-white border-t border-slate-200 py-3 text-center text-xs text-slate-500">
+        <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-1 text-[11px]">
+          <div>CampusCare Maintenance System</div>
+          <div>© {new Date().getFullYear()} Apex College Facilities</div>
         </div>
       </footer>
 

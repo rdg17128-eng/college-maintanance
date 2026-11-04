@@ -77,38 +77,38 @@ export function ComplaintFormModal({ isOpen, onClose, onSuccess }) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40">
-      <div className="bg-white rounded-lg border border-sky-300 max-w-lg w-full p-6 shadow-md relative text-black max-h-[92vh] overflow-y-auto">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-[1px]">
+      <div className="bg-white rounded-xl border border-slate-200 max-w-lg w-full p-6 shadow-lg relative text-slate-900 max-h-[92vh] overflow-y-auto animate-modal">
         
         {/* Header */}
-        <div className="flex items-center justify-between pb-3 border-b border-sky-200">
+        <div className="flex items-center justify-between pb-3 border-b border-slate-100">
           <div>
-            <h2 className="text-lg font-bold text-black">
+            <h2 className="text-base font-bold text-slate-900">
               Report Campus Issue
             </h2>
-            <p className="text-xs text-black">
+            <p className="text-xs text-slate-500 mt-0.5">
               Fill in the location and details of the required repair.
             </p>
           </div>
           <button
             onClick={onClose}
-            className="px-2.5 py-1 text-black bg-white hover:bg-sky-50 rounded border border-sky-300 text-xs font-bold cursor-pointer"
+            className="text-slate-400 hover:text-slate-700 text-sm font-semibold p-1 cursor-pointer"
           >
-            Close
+            ✕
           </button>
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="mt-4 space-y-4 text-xs">
+        <form onSubmit={handleSubmit} className="mt-4 space-y-3.5 text-xs">
           
           <div>
-            <label className="block text-black font-bold mb-1">
+            <label className="block text-slate-700 font-medium mb-1">
               Issue Category *
             </label>
             <select
               value={category}
               onChange={(e) => setCategory(e.target.value)}
-              className="w-full bg-white border border-sky-300 rounded px-3 py-2 text-black font-medium focus:outline-none focus:border-sky-600 cursor-pointer"
+              className="w-full bg-white border border-slate-300 rounded-md px-3 py-2 text-slate-800 text-xs focus:outline-none focus:border-blue-500 cursor-pointer"
             >
               {CATEGORIES.map(cat => (
                 <option key={cat.id} value={cat.id}>
@@ -120,13 +120,13 @@ export function ComplaintFormModal({ isOpen, onClose, onSuccess }) {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label className="block text-black font-bold mb-1">
+              <label className="block text-slate-700 font-medium mb-1">
                 Building *
               </label>
               <select
                 value={building}
                 onChange={(e) => setBuilding(e.target.value)}
-                className="w-full bg-white border border-sky-300 rounded px-3 py-2 text-black font-medium focus:outline-none focus:border-sky-600 cursor-pointer"
+                className="w-full bg-white border border-slate-300 rounded-md px-3 py-2 text-slate-800 text-xs focus:outline-none focus:border-blue-500 cursor-pointer"
               >
                 {BUILDINGS.map(b => (
                   <option key={b.name} value={b.name}>{b.name}</option>
@@ -135,13 +135,13 @@ export function ComplaintFormModal({ isOpen, onClose, onSuccess }) {
             </div>
 
             <div>
-              <label className="block text-black font-bold mb-1">
+              <label className="block text-slate-700 font-medium mb-1">
                 Floor *
               </label>
               <select
                 value={floor}
                 onChange={(e) => setFloor(e.target.value)}
-                className="w-full bg-white border border-sky-300 rounded px-3 py-2 text-black font-medium focus:outline-none focus:border-sky-600 cursor-pointer"
+                className="w-full bg-white border border-slate-300 rounded-md px-3 py-2 text-slate-800 text-xs focus:outline-none focus:border-blue-500 cursor-pointer"
               >
                 <option value="Ground Floor">Ground Floor</option>
                 <option value="1st Floor">1st Floor</option>
@@ -154,7 +154,7 @@ export function ComplaintFormModal({ isOpen, onClose, onSuccess }) {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label className="block text-black font-bold mb-1">
+              <label className="block text-slate-700 font-medium mb-1">
                 Room / Area Code *
               </label>
               <input
@@ -163,18 +163,18 @@ export function ComplaintFormModal({ isOpen, onClose, onSuccess }) {
                 placeholder="e.g. Room 204 or Lab 3"
                 value={roomNumber}
                 onChange={(e) => setRoomNumber(e.target.value)}
-                className="w-full bg-white border border-sky-300 rounded px-3 py-2 text-black font-medium focus:outline-none focus:border-sky-600"
+                className="w-full bg-white border border-slate-300 rounded-md px-3 py-2 text-slate-800 text-xs focus:outline-none focus:border-blue-500"
               />
             </div>
 
             <div>
-              <label className="block text-black font-bold mb-1">
+              <label className="block text-slate-700 font-medium mb-1">
                 Priority *
               </label>
               <select
                 value={priority}
                 onChange={(e) => setPriority(e.target.value)}
-                className="w-full bg-white border border-sky-300 rounded px-3 py-2 text-black font-medium focus:outline-none focus:border-sky-600 cursor-pointer"
+                className="w-full bg-white border border-slate-300 rounded-md px-3 py-2 text-slate-800 text-xs focus:outline-none focus:border-blue-500 cursor-pointer"
               >
                 {PRIORITIES.map(p => (
                   <option key={p.id} value={p.id}>
@@ -186,37 +186,37 @@ export function ComplaintFormModal({ isOpen, onClose, onSuccess }) {
           </div>
 
           <div>
-            <label className="block text-black font-bold mb-1">
+            <label className="block text-slate-700 font-medium mb-1">
               Description of Problem *
             </label>
             <textarea
               required
               rows={3}
-              placeholder="Describe the issue clearly..."
+              placeholder="Describe what needs repair..."
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              className="w-full bg-white border border-sky-300 rounded px-3 py-2 text-black font-medium focus:outline-none focus:border-sky-600 resize-none"
+              className="w-full bg-white border border-slate-300 rounded-md px-3 py-2 text-slate-800 text-xs focus:outline-none focus:border-blue-500 resize-none"
             />
           </div>
 
           <div>
-            <label className="block text-black font-bold mb-1">
+            <label className="block text-slate-700 font-medium mb-1">
               Photo Attachment (Optional)
             </label>
             {imageUrl ? (
-              <div className="flex items-center gap-3 p-2 bg-sky-50 border border-sky-300 rounded">
-                <span className="text-xs font-semibold text-black">Image attached</span>
+              <div className="flex items-center gap-3 p-2 bg-slate-50 border border-slate-200 rounded-md">
+                <span className="text-xs text-slate-700 font-medium">Image attached</span>
                 <button
                   type="button"
                   onClick={() => setImageUrl('')}
-                  className="px-2 py-0.5 bg-white text-black border border-sky-300 rounded text-xs font-bold cursor-pointer hover:bg-sky-100"
+                  className="px-2 py-0.5 bg-white text-slate-600 border border-slate-200 rounded text-xs hover:bg-slate-100 cursor-pointer"
                 >
                   Remove
                 </button>
               </div>
             ) : (
-              <label className="block border border-dashed border-sky-400 bg-sky-50 p-3 rounded text-center cursor-pointer hover:bg-sky-100">
-                <span className="text-xs text-black font-semibold">
+              <label className="block border border-dashed border-slate-300 bg-slate-50 p-3 rounded-md text-center cursor-pointer hover:bg-slate-100 transition-colors">
+                <span className="text-xs text-slate-600">
                   {uploading ? 'Uploading...' : 'Click to select image file'}
                 </span>
                 <input
@@ -230,18 +230,18 @@ export function ComplaintFormModal({ isOpen, onClose, onSuccess }) {
             )}
           </div>
 
-          <div className="pt-3 border-t border-sky-200 flex items-center justify-end gap-2">
+          <div className="pt-3 border-t border-slate-100 flex items-center justify-end gap-2">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 rounded text-black bg-white hover:bg-sky-50 border border-sky-200 font-bold cursor-pointer"
+              className="px-3.5 py-1.5 rounded-md text-slate-600 bg-white hover:bg-slate-50 border border-slate-200 font-medium cursor-pointer"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={submitting || uploading}
-              className="px-5 py-2 bg-sky-500 hover:bg-sky-600 text-white font-bold rounded cursor-pointer"
+              className="px-4 py-1.5 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-md transition-colors cursor-pointer disabled:opacity-50"
             >
               {submitting ? 'Submitting...' : 'Submit Report'}
             </button>

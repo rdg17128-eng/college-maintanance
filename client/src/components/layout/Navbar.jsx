@@ -16,75 +16,54 @@ export function Navbar() {
   };
 
   return (
-    <header className="bg-white border-b border-sky-300">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+    <header className="bg-white border-b border-slate-200 sticky top-0 z-40">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
         
-        {/* Brand with Circular Logo */}
+        {/* Brand */}
         <div className="flex items-center gap-3">
-          <div className="w-14 h-14 rounded-full border-2 border-sky-400 bg-white flex items-center justify-center p-1 overflow-hidden shrink-0 shadow-xs">
-            <img src="/logo.png" alt="CampusCare Logo" className="w-full h-full object-contain" />
+          <img src="/logo.png" alt="CampusCare Logo" className="w-8 h-8 object-contain rounded" />
+          <div className="flex items-center gap-2">
+            <span className="font-semibold text-lg text-slate-900 tracking-tight">
+              CampusCare
+            </span>
+            <span className="text-[11px] font-medium text-slate-500 bg-slate-100 px-2 py-0.5 rounded">
+              Maintenance
+            </span>
           </div>
-          <span className="font-bold text-2xl text-black tracking-tight">
-            CampusCare
-          </span>
-          <span className="text-xs font-bold uppercase tracking-wider text-black bg-sky-100 px-2.5 py-0.5 rounded border border-sky-300">
-            Maintenance
-          </span>
         </div>
 
         {/* Right Navigation Controls */}
         <div className="flex items-center gap-3">
           
-          {/* Role Switcher - Sky Blue & White Only */}
-          <div className="hidden sm:flex items-center gap-1.5 p-1 rounded bg-sky-50 border border-sky-200 text-xs">
-            <span className="text-black font-semibold px-2">Role:</span>
-            <button
-              onClick={() => handleRoleSwitch('student')}
-              className={`px-3 py-1 rounded font-bold cursor-pointer transition-colors ${
-                user?.role === 'student'
-                  ? 'bg-sky-500 text-white'
-                  : 'text-black hover:bg-sky-100'
-              }`}
+          {/* Subtle Demo Role Switcher */}
+          <div className="hidden sm:flex items-center gap-1.5 text-xs">
+            <label htmlFor="role-select" className="text-slate-400 text-[11px]">Role:</label>
+            <select
+              id="role-select"
+              value={user?.role}
+              onChange={(e) => handleRoleSwitch(e.target.value)}
+              className="bg-slate-50 border border-slate-200 rounded px-2 py-1 text-slate-700 text-xs font-medium cursor-pointer focus:outline-none focus:border-blue-500"
             >
-              Student
-            </button>
-            <button
-              onClick={() => handleRoleSwitch('faculty')}
-              className={`px-3 py-1 rounded font-bold cursor-pointer transition-colors ${
-                user?.role === 'faculty'
-                  ? 'bg-sky-500 text-white'
-                  : 'text-black hover:bg-sky-100'
-              }`}
-            >
-              Faculty
-            </button>
-            <button
-              onClick={() => handleRoleSwitch('admin')}
-              className={`px-3 py-1 rounded font-bold cursor-pointer transition-colors ${
-                user?.role === 'admin'
-                  ? 'bg-sky-500 text-white'
-                  : 'text-black hover:bg-sky-100'
-              }`}
-            >
-              Admin
-            </button>
+              <option value="student">Student</option>
+              <option value="faculty">Faculty</option>
+              <option value="admin">Admin</option>
+            </select>
           </div>
 
-          {/* User Details */}
+          {/* User Info */}
           <div className="text-right hidden md:block">
-            <div className="text-xs font-bold text-black">{user?.name}</div>
-            <div className="text-[10px] text-black">{user?.department || user?.email}</div>
+            <div className="text-xs font-medium text-slate-800">{user?.name}</div>
+            <div className="text-[11px] text-slate-400">{user?.department || user?.email}</div>
           </div>
 
-          {/* Current Role Badge */}
-          <span className="px-2.5 py-1 rounded text-xs font-bold uppercase bg-sky-100 text-black border border-sky-300">
+          <span className="px-2 py-0.5 rounded text-[11px] font-medium uppercase bg-blue-50 text-blue-700 border border-blue-200">
             {user?.role}
           </span>
 
           {/* Sign Out Button */}
           <button
             onClick={logout}
-            className="px-3 py-1 text-xs font-bold text-black bg-white hover:bg-sky-100 border border-sky-300 rounded cursor-pointer"
+            className="px-3 py-1.5 text-xs font-medium text-slate-600 bg-white hover:bg-slate-100 border border-slate-200 rounded-md transition-colors cursor-pointer"
           >
             Sign Out
           </button>
