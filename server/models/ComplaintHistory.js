@@ -10,3 +10,4 @@ const complaintHistorySchema = new mongoose.Schema({
 });
 
 module.exports = mongoose.model('ComplaintHistory', complaintHistorySchema);
+

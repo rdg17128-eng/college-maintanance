@@ -10,3 +10,4 @@ const maintenanceStaffSchema = new mongoose.Schema({
 });
 
 module.exports = mongoose.model('MaintenanceStaff', maintenanceStaffSchema);
+

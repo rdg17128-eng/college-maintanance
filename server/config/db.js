@@ -9,7 +9,7 @@ const MaintenanceStaff = require('../models/MaintenanceStaff');
 const Setting = require('../models/Setting');
 
 async function initDB() {
-  const uri = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/campuscare';
+  const uri = process.env.MONGODB_URI || 'mongodb://localhost:27017/college_maintanance';
 
   try {
     await mongoose.connect(uri);
