@@ -1,6 +1,6 @@
 # CampusCare - College Maintenance Management System
 
-A modern, streamlined web application for college campuses allowing students, faculty, and administrators to report, manage, and track maintenance issues efficiently. Built with **React 19**, **Vite 8**, **Tailwind CSS v4**, **Node.js**, **Express.js**, and **SQLite3**.
+A modern, streamlined web application for college campuses allowing students, faculty, and administrators to report, manage, and track maintenance issues efficiently. Built with the **MERN** stack: **React 19**, **Vite 8**, **Tailwind CSS v4**, **Node.js**, **Express.js**, and **MongoDB** (via **Mongoose**).
 
 ---
 
@@ -22,7 +22,7 @@ A modern, streamlined web application for college campuses allowing students, fa
 ### Backend
 - **Runtime**: [Node.js](https://nodejs.org/) (v18+ recommended)
 - **Web Framework**: [Express.js 5](https://expressjs.com/) (`v5.3.0`) — RESTful API routing, error handling, and middleware architecture.
-- **Database**: [SQLite 3](https://www.sqlite.org/) (`sqlite3@^6.0.1`) — File-based relational database (`database.sqlite`) with tables for users, complaints, complaint history, and notifications.
+- **Database**: [MongoDB](https://www.mongodb.com/) via [Mongoose](https://mongoosejs.com/) (`mongoose@^8.x`) — Document-based database with schemas and models for `User`, `Complaint`, `ComplaintHistory`, `Notification`, `MaintenanceStaff`, and `Setting`. Auto-seeds demo accounts and complaints upon first connection.
 - **Authentication & Security**:
   - [JSON Web Tokens (JWT)](https://jwt.io/) (`jsonwebtoken@^9.0.3`) — Secure token-based session management.
   - [Bcrypt.js](https://github.com/dcodeIO/bcrypt.js) (`bcryptjs@^3.0.3`) — Salted password hashing and verification.
@@ -71,7 +71,8 @@ A modern, streamlined web application for college campuses allowing students, fa
 │
 ├── server/                     # Backend Express REST API
 │   ├── config/
-│   │   └── db.js               # SQLite database initialization & seeding
+│   │   └── db.js               # MongoDB Mongoose connection & initial seeder
+│   ├── models/                 # Mongoose schemas (User, Complaint, Notification, etc.)
 │   ├── middleware/
 │   │   └── auth.js             # JWT verification & role authorization
 │   ├── routes/
@@ -84,7 +85,6 @@ A modern, streamlined web application for college campuses allowing students, fa
 │   └── index.js                # Express app entry, middleware & listener
 │
 ├── uploads/                    # Uploaded image attachments
-├── database.sqlite             # Local SQLite database
 ├── .env.example                # Sample environment configuration
 ├── package.json                # Root package configuration & dev scripts
 └── README.md                   # Project documentation
@@ -97,6 +97,7 @@ A modern, streamlined web application for college campuses allowing students, fa
 ### Prerequisites
 
 - **Node.js** (v18 or higher recommended)
+- **MongoDB** (Local MongoDB Community Server or MongoDB Atlas URI)
 - **npm** (comes with Node.js)
 
 ### Installation

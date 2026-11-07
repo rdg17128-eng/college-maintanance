@@ -2,7 +2,8 @@ const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const { get, run, all } = require('../config/db');
+const User = require('../models/User');
+const Notification = require('../models/Notification');
 const { JWT_SECRET, requireAuth } = require('../middleware/auth');
 
 // POST /api/auth/login
@@ -13,7 +14,7 @@ router.post('/login', async (req, res) => {
       return res.status(400).json({ error: 'Email and password are required' });
     }
 
-    const user = await get(`SELECT * FROM users WHERE LOWER(email) = LOWER(?)`, [email.trim()]);
+    const user = await User.findOne({ email: email.trim().toLowerCase() });
     if (!user) {
       return res.status(401).json({ error: 'Invalid email or password' });
     }
@@ -41,10 +42,12 @@ router.post('/login', async (req, res) => {
       { expiresIn: '7d' }
     );
 
-    const { password: _, ...userWithoutPassword } = user;
+    const userObj = user.toObject();
+    delete userObj.password;
+
     res.json({
       token,
-      user: userWithoutPassword,
+      user: userObj,
       message: 'Logged in successfully'
     });
   } catch (err) {
@@ -66,7 +69,7 @@ router.post('/register', async (req, res) => {
       return res.status(400).json({ error: 'Registration is only permitted for Students and Faculty members' });
     }
 
-    const existing = await get(`SELECT user_id FROM users WHERE LOWER(email) = LOWER(?)`, [email.trim()]);
+    const existing = await User.findOne({ email: email.trim().toLowerCase() });
     if (existing) {
       return res.status(409).json({ error: 'An account with this email address already exists' });
     }
@@ -74,45 +77,40 @@ router.post('/register', async (req, res) => {
     const salt = bcrypt.genSaltSync(10);
     const hashedPassword = bcrypt.hashSync(password, salt);
     const userId = `usr-${role.substring(0, 3)}-${Date.now().toString().slice(-6)}`;
+    const avatarUrl = `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(name.trim())}`;
 
-    await run(`
-      INSERT INTO users (user_id, name, email, password, role, department, reg_number, avatar_url)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-    `, [
-      userId,
-      name.trim(),
-      email.trim(),
-      hashedPassword,
+    const newUser = new User({
+      user_id: userId,
+      name: name.trim(),
+      email: email.trim().toLowerCase(),
+      password: hashedPassword,
       role,
-      department || 'General',
-      regNumber || '',
-      `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(name)}`
-    ]);
+      department: department || 'General',
+      reg_number: regNumber || '',
+      avatar_url: avatarUrl
+    });
+
+    await newUser.save();
 
     const token = jwt.sign(
       {
         userId,
-        name,
-        email,
-        role,
-        department,
-        regNumber
+        name: newUser.name,
+        email: newUser.email,
+        role: newUser.role,
+        department: newUser.department,
+        regNumber: newUser.reg_number
       },
       JWT_SECRET,
       { expiresIn: '7d' }
     );
 
+    const userObj = newUser.toObject();
+    delete userObj.password;
+
     res.status(201).json({
       token,
-      user: {
-        user_id: userId,
-        name,
-        email,
-        role,
-        department,
-        reg_number: regNumber,
-        avatar_url: `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(name)}`
-      },
+      user: userObj,
       message: 'Account registered successfully'
     });
   } catch (err) {
@@ -124,18 +122,22 @@ router.post('/register', async (req, res) => {
 // GET /api/auth/me
 router.get('/me', requireAuth, async (req, res) => {
   try {
-    const user = await get(`SELECT user_id, name, email, role, department, reg_number, avatar_url, created_at FROM users WHERE user_id = ?`, [req.user.userId]);
+    const user = await User.findOne({ user_id: req.user.userId }).select('-password');
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
     }
 
-    const unreadNotifs = await get(`SELECT COUNT(*) as count FROM notifications WHERE user_id = ? AND read_status = 0`, [user.user_id]);
+    const unreadCount = await Notification.countDocuments({
+      user_id: user.user_id,
+      read_status: 0
+    });
 
     res.json({
-      user,
-      unreadNotifications: unreadNotifs.count
+      user: user.toObject(),
+      unreadNotifications: unreadCount
     });
   } catch (err) {
+    console.error('Fetch profile error:', err);
     res.status(500).json({ error: 'Failed to fetch user profile' });
   }
 });
@@ -143,12 +145,13 @@ router.get('/me', requireAuth, async (req, res) => {
 // GET /api/auth/demo-users
 router.get('/demo-users', async (req, res) => {
   try {
-    const users = await all(`
-      SELECT user_id, name, email, role, department, reg_number, avatar_url 
-      FROM users 
-      WHERE email IN ('student@apexcollege.edu', 'faculty@apexcollege.edu', 'admin@apexcollege.edu')
-      ORDER BY CASE role WHEN 'student' THEN 1 WHEN 'faculty' THEN 2 ELSE 3 END
-    `);
+    const users = await User.find({
+      email: { $in: ['student@apexcollege.edu', 'faculty@apexcollege.edu', 'admin@apexcollege.edu'] }
+    }).select('-password');
+
+    const roleOrder = { student: 1, faculty: 2, admin: 3 };
+    users.sort((a, b) => (roleOrder[a.role] || 99) - (roleOrder[b.role] || 99));
+
     res.json(users);
   } catch (err) {
     res.status(500).json({ error: 'Failed to fetch demo accounts' });

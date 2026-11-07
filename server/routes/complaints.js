@@ -1,6 +1,9 @@
 const express = require('express');
 const router = express.Router();
-const { get, run, all } = require('../config/db');
+const Complaint = require('../models/Complaint');
+const ComplaintHistory = require('../models/ComplaintHistory');
+const Notification = require('../models/Notification');
+const User = require('../models/User');
 const { requireAuth, requireAdmin } = require('../middleware/auth');
 
 // Generate unique complaint ID: CMP-2026-XXXX
@@ -13,10 +16,14 @@ function generateComplaintId() {
 // Helper to push notification
 async function createNotification(userId, complaintId, title, message) {
   try {
-    await run(`
-      INSERT INTO notifications (user_id, complaint_id, title, message, read_status)
-      VALUES (?, ?, ?, ?, 0)
-    `, [userId, complaintId, title, message]);
+    await Notification.create({
+      user_id: userId,
+      complaint_id: complaintId,
+      title,
+      message,
+      read_status: 0,
+      created_date: new Date()
+    });
   } catch (err) {
     console.error('Failed to create notification:', err);
   }
@@ -37,59 +44,48 @@ router.get('/', requireAuth, async (req, res) => {
       search
     } = req.query;
 
-    let query = `SELECT * FROM complaints WHERE 1=1`;
-    const params = [];
+    const filter = {};
 
     // Role-based isolation
     if (role !== 'admin') {
-      query += ` AND reporter_id = ?`;
-      params.push(userId);
+      filter.reporter_id = userId;
     } else if (reporterRole) {
-      query += ` AND reporter_role = ?`;
-      params.push(reporterRole);
+      filter.reporter_role = reporterRole;
     }
 
     if (status && status !== 'All') {
-      query += ` AND status = ?`;
-      params.push(status);
+      filter.status = status;
     }
 
     if (category && category !== 'All') {
-      query += ` AND category = ?`;
-      params.push(category);
+      filter.category = category;
     }
 
     if (priority && priority !== 'All') {
-      query += ` AND priority = ?`;
-      params.push(priority);
+      filter.priority = priority;
     }
 
     if (department && department !== 'All') {
-      query += ` AND department = ?`;
-      params.push(department);
+      filter.department = department;
     }
 
     if (building && building !== 'All') {
-      query += ` AND building = ?`;
-      params.push(building);
+      filter.building = building;
     }
 
     if (search && search.trim() !== '') {
-      const term = `%${search.trim()}%`;
-      query += ` AND (
-        complaint_id LIKE ? OR 
-        description LIKE ? OR 
-        room_number LIKE ? OR 
-        building LIKE ? OR 
-        reporter_name LIKE ? OR
-        category LIKE ?
-      )`;
-      params.push(term, term, term, term, term, term);
+      const regex = new RegExp(search.trim(), 'i');
+      filter.$or = [
+        { complaint_id: regex },
+        { description: regex },
+        { room_number: regex },
+        { building: regex },
+        { reporter_name: regex },
+        { category: regex }
+      ];
     }
 
-    query += ` ORDER BY created_date DESC`;
-
-    const complaints = await all(query, params);
+    const complaints = await Complaint.find(filter).sort({ created_date: -1 });
     res.json(complaints);
   } catch (err) {
     console.error('Error fetching complaints:', err);
@@ -103,7 +99,7 @@ router.get('/:id', requireAuth, async (req, res) => {
     const { id } = req.params;
     const { role, userId } = req.user;
 
-    const complaint = await get(`SELECT * FROM complaints WHERE complaint_id = ?`, [id]);
+    const complaint = await Complaint.findOne({ complaint_id: id });
     if (!complaint) {
       return res.status(404).json({ error: 'Complaint not found' });
     }
@@ -113,12 +109,7 @@ router.get('/:id', requireAuth, async (req, res) => {
       return res.status(403).json({ error: 'Unauthorized to view this complaint' });
     }
 
-    // Fetch history
-    const history = await all(`
-      SELECT * FROM complaint_history 
-      WHERE complaint_id = ? 
-      ORDER BY timestamp ASC
-    `, [id]);
+    const history = await ComplaintHistory.find({ complaint_id: id }).sort({ timestamp: 1 });
 
     res.json({
       complaint,
@@ -154,34 +145,37 @@ router.post('/', requireAuth, async (req, res) => {
     const complaintId = generateComplaintId();
     const targetDept = department || userDept || 'General';
 
-    await run(`
-      INSERT INTO complaints (
-        complaint_id, reporter_id, reporter_name, reporter_role,
-        building, block, floor, room_number, room_type, department,
-        category, description, image_url, priority, status
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Submitted')
-    `, [
-      complaintId,
-      userId,
-      name,
-      role,
+    const newComplaint = new Complaint({
+      complaint_id: complaintId,
+      reporter_id: userId,
+      reporter_name: name,
+      reporter_role: role,
       building,
-      block || '',
+      block: block || '',
       floor,
-      roomNumber,
-      roomType,
-      targetDept,
+      room_number: roomNumber,
+      room_type: roomType,
+      department: targetDept,
       category,
       description,
-      imageUrl || null,
-      priority
-    ]);
+      image_url: imageUrl || null,
+      priority,
+      status: 'Submitted',
+      created_date: new Date(),
+      updated_date: new Date()
+    });
+
+    await newComplaint.save();
 
     // Initial history record
-    await run(`
-      INSERT INTO complaint_history (complaint_id, previous_status, new_status, updated_by, remarks)
-      VALUES (?, NULL, 'Submitted', ?, 'Complaint logged via maintenance portal')
-    `, [complaintId, name]);
+    await ComplaintHistory.create({
+      complaint_id: complaintId,
+      previous_status: null,
+      new_status: 'Submitted',
+      updated_by: name,
+      remarks: 'Complaint logged via maintenance portal',
+      timestamp: new Date()
+    });
 
     // Notify user of successful submission
     await createNotification(
@@ -193,7 +187,7 @@ router.post('/', requireAuth, async (req, res) => {
 
     // If emergency priority, also notify admins
     if (priority === 'Emergency') {
-      const admins = await all(`SELECT user_id FROM users WHERE role = 'admin'`);
+      const admins = await User.find({ role: 'admin' });
       for (const adm of admins) {
         await createNotification(
           adm.user_id,
@@ -204,10 +198,9 @@ router.post('/', requireAuth, async (req, res) => {
       }
     }
 
-    const created = await get(`SELECT * FROM complaints WHERE complaint_id = ?`, [complaintId]);
     res.status(201).json({
       message: 'Complaint submitted successfully',
-      complaint: created
+      complaint: newComplaint
     });
   } catch (err) {
     console.error('Error submitting complaint:', err);
@@ -215,19 +208,18 @@ router.post('/', requireAuth, async (req, res) => {
   }
 });
 
-// PUT /api/complaints/:id/status - Update Status (Admin only, or student/faculty reopening)
+// PUT /api/complaints/:id/status - Update Status (Admin only)
 router.put('/:id/status', requireAuth, async (req, res) => {
   try {
     const { id } = req.params;
     const { status, remarks, internalNotes } = req.body;
-    const { role, name, userId } = req.user;
+    const { role, name } = req.user;
 
-    const complaint = await get(`SELECT * FROM complaints WHERE complaint_id = ?`, [id]);
+    const complaint = await Complaint.findOne({ complaint_id: id });
     if (!complaint) {
       return res.status(404).json({ error: 'Complaint not found' });
     }
 
-    // Check permissions
     if (role !== 'admin') {
       return res.status(403).json({ error: 'Only administrative personnel can update status directly' });
     }
@@ -235,26 +227,27 @@ router.put('/:id/status', requireAuth, async (req, res) => {
     const prevStatus = complaint.status;
     let resolvedDate = complaint.resolved_date;
     if (status === 'Resolved' && !resolvedDate) {
-      resolvedDate = new Date().toISOString().replace('T', ' ').substring(0, 19);
+      resolvedDate = new Date();
     } else if (status !== 'Resolved') {
       resolvedDate = null;
     }
 
-    await run(`
-      UPDATE complaints 
-      SET status = ?, 
-          resolution_remarks = COALESCE(?, resolution_remarks),
-          internal_notes = COALESCE(?, internal_notes),
-          resolved_date = ?,
-          updated_date = CURRENT_TIMESTAMP
-      WHERE complaint_id = ?
-    `, [status, remarks || null, internalNotes || null, resolvedDate, id]);
+    complaint.status = status;
+    if (remarks) complaint.resolution_remarks = remarks;
+    if (internalNotes) complaint.internal_notes = internalNotes;
+    complaint.resolved_date = resolvedDate;
+    complaint.updated_date = new Date();
+    await complaint.save();
 
     // Add audit history
-    await run(`
-      INSERT INTO complaint_history (complaint_id, previous_status, new_status, updated_by, remarks)
-      VALUES (?, ?, ?, ?, ?)
-    `, [id, prevStatus, status, name, remarks || `Status transitioned to ${status}`]);
+    await ComplaintHistory.create({
+      complaint_id: id,
+      previous_status: prevStatus,
+      new_status: status,
+      updated_by: name,
+      remarks: remarks || `Status transitioned to ${status}`,
+      timestamp: new Date()
+    });
 
     // Notify original reporter
     await createNotification(
@@ -264,10 +257,9 @@ router.put('/:id/status', requireAuth, async (req, res) => {
       `Your complaint #${id} status changed to ${status}.${remarks ? ` Note: "${remarks}"` : ''}`
     );
 
-    const updated = await get(`SELECT * FROM complaints WHERE complaint_id = ?`, [id]);
     res.json({
       message: 'Complaint status updated successfully',
-      complaint: updated
+      complaint
     });
   } catch (err) {
     console.error('Error updating status:', err);
@@ -282,7 +274,7 @@ router.put('/:id/assign', requireAdmin, async (req, res) => {
     const { staffName, staffPhone, targetDate, internalNotes } = req.body;
     const { name: adminName } = req.user;
 
-    const complaint = await get(`SELECT * FROM complaints WHERE complaint_id = ?`, [id]);
+    const complaint = await Complaint.findOne({ complaint_id: id });
     if (!complaint) {
       return res.status(404).json({ error: 'Complaint not found' });
     }
@@ -290,24 +282,23 @@ router.put('/:id/assign', requireAdmin, async (req, res) => {
     const prevStatus = complaint.status;
     const newStatus = 'Assigned';
 
-    await run(`
-      UPDATE complaints 
-      SET assigned_staff = ?,
-          assigned_staff_phone = ?,
-          target_date = ?,
-          status = ?,
-          internal_notes = COALESCE(?, internal_notes),
-          updated_date = CURRENT_TIMESTAMP
-      WHERE complaint_id = ?
-    `, [staffName, staffPhone || null, targetDate || null, newStatus, internalNotes || null, id]);
+    complaint.assigned_staff = staffName;
+    if (staffPhone) complaint.assigned_staff_phone = staffPhone;
+    if (targetDate) complaint.target_date = new Date(targetDate);
+    if (internalNotes) complaint.internal_notes = internalNotes;
+    complaint.status = newStatus;
+    complaint.updated_date = new Date();
+    await complaint.save();
 
-    // Add history record
-    await run(`
-      INSERT INTO complaint_history (complaint_id, previous_status, new_status, updated_by, remarks)
-      VALUES (?, ?, ?, ?, ?)
-    `, [id, prevStatus, newStatus, adminName, `Assigned to ${staffName}${targetDate ? ` (Target: ${targetDate})` : ''}`]);
+    await ComplaintHistory.create({
+      complaint_id: id,
+      previous_status: prevStatus,
+      new_status: newStatus,
+      updated_by: adminName,
+      remarks: `Assigned to ${staffName}${targetDate ? ` (Target: ${targetDate})` : ''}`,
+      timestamp: new Date()
+    });
 
-    // Notify reporter
     await createNotification(
       complaint.reporter_id,
       id,
@@ -315,10 +306,9 @@ router.put('/:id/assign', requireAdmin, async (req, res) => {
       `Technician ${staffName} has been assigned to work on your complaint #${id}.`
     );
 
-    const updated = await get(`SELECT * FROM complaints WHERE complaint_id = ?`, [id]);
     res.json({
       message: 'Staff assigned successfully',
-      complaint: updated
+      complaint
     });
   } catch (err) {
     console.error('Error assigning staff:', err);
@@ -333,7 +323,7 @@ router.post('/:id/reopen', requireAuth, async (req, res) => {
     const { reason } = req.body;
     const { role, name, userId } = req.user;
 
-    const complaint = await get(`SELECT * FROM complaints WHERE complaint_id = ?`, [id]);
+    const complaint = await Complaint.findOne({ complaint_id: id });
     if (!complaint) {
       return res.status(404).json({ error: 'Complaint not found' });
     }
@@ -345,24 +335,23 @@ router.post('/:id/reopen', requireAuth, async (req, res) => {
     const prevStatus = complaint.status;
     const newStatus = 'Under Review';
 
-    await run(`
-      UPDATE complaints 
-      SET status = ?,
-          resolved_date = NULL,
-          resolution_remarks = ?,
-          updated_date = CURRENT_TIMESTAMP
-      WHERE complaint_id = ?
-    `, [newStatus, `Reopened: ${reason || 'Issue still persists'}`, id]);
+    complaint.status = newStatus;
+    complaint.resolved_date = null;
+    complaint.resolution_remarks = `Reopened: ${reason || 'Issue still persists'}`;
+    complaint.updated_date = new Date();
+    await complaint.save();
 
-    // History record
-    await run(`
-      INSERT INTO complaint_history (complaint_id, previous_status, new_status, updated_by, remarks)
-      VALUES (?, ?, ?, ?, ?)
-    `, [id, prevStatus, newStatus, name, `Complaint reopened: ${reason || 'Issue still persists'}`]);
+    await ComplaintHistory.create({
+      complaint_id: id,
+      previous_status: prevStatus,
+      new_status: newStatus,
+      updated_by: name,
+      remarks: `Complaint reopened: ${reason || 'Issue still persists'}`,
+      timestamp: new Date()
+    });
 
-    // If student/faculty reopened, notify admin
     if (role !== 'admin') {
-      const admins = await all(`SELECT user_id FROM users WHERE role = 'admin'`);
+      const admins = await User.find({ role: 'admin' });
       for (const adm of admins) {
         await createNotification(
           adm.user_id,
@@ -373,10 +362,9 @@ router.post('/:id/reopen', requireAuth, async (req, res) => {
       }
     }
 
-    const updated = await get(`SELECT * FROM complaints WHERE complaint_id = ?`, [id]);
     res.json({
       message: 'Complaint reopened successfully',
-      complaint: updated
+      complaint
     });
   } catch (err) {
     console.error('Error reopening complaint:', err);
@@ -391,27 +379,29 @@ router.post('/:id/verify', requireAdmin, async (req, res) => {
     const { verified, remarks } = req.body;
     const { name: adminName } = req.user;
 
-    const complaint = await get(`SELECT * FROM complaints WHERE complaint_id = ?`, [id]);
+    const complaint = await Complaint.findOne({ complaint_id: id });
     if (!complaint) {
       return res.status(404).json({ error: 'Complaint not found' });
     }
 
+    const prevStatus = complaint.status;
     const newStatus = verified ? 'Resolved' : 'In Progress';
-    const resolvedDate = verified ? new Date().toISOString().replace('T', ' ').substring(0, 19) : null;
+    const resolvedDate = verified ? new Date() : null;
 
-    await run(`
-      UPDATE complaints
-      SET status = ?,
-          resolution_remarks = ?,
-          resolved_date = ?,
-          updated_date = CURRENT_TIMESTAMP
-      WHERE complaint_id = ?
-    `, [newStatus, remarks || (verified ? 'Inspection passed & verified.' : 'Verification failed, further work required.'), resolvedDate, id]);
+    complaint.status = newStatus;
+    complaint.resolution_remarks = remarks || (verified ? 'Inspection passed & verified.' : 'Verification failed, further work required.');
+    complaint.resolved_date = resolvedDate;
+    complaint.updated_date = new Date();
+    await complaint.save();
 
-    await run(`
-      INSERT INTO complaint_history (complaint_id, previous_status, new_status, updated_by, remarks)
-      VALUES (?, ?, ?, ?, ?)
-    `, [id, complaint.status, newStatus, adminName, `Resolution inspection: ${verified ? 'Verified & Approved' : 'Rejected back to In Progress'}. ${remarks || ''}`]);
+    await ComplaintHistory.create({
+      complaint_id: id,
+      previous_status: prevStatus,
+      new_status: newStatus,
+      updated_by: adminName,
+      remarks: `Resolution inspection: ${verified ? 'Verified & Approved' : 'Rejected back to In Progress'}. ${remarks || ''}`,
+      timestamp: new Date()
+    });
 
     await createNotification(
       complaint.reporter_id,
@@ -422,10 +412,9 @@ router.post('/:id/verify', requireAdmin, async (req, res) => {
         : `Admin inspected complaint #${id} and sent it back for additional work: ${remarks || ''}`
     );
 
-    const updated = await get(`SELECT * FROM complaints WHERE complaint_id = ?`, [id]);
     res.json({
       message: verified ? 'Complaint verified and resolved' : 'Complaint sent back for rework',
-      complaint: updated
+      complaint
     });
   } catch (err) {
     console.error('Error verifying complaint:', err);

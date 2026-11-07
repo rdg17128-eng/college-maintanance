@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { all } = require('../config/db');
+const Complaint = require('../models/Complaint');
 const { requireAdmin } = require('../middleware/auth');
 
 // GET /api/export/csv
@@ -8,29 +8,13 @@ router.get('/csv', requireAdmin, async (req, res) => {
   try {
     const { status, category, priority, department } = req.query;
 
-    let query = `SELECT * FROM complaints WHERE 1=1`;
-    const params = [];
+    const filter = {};
+    if (status && status !== 'All') filter.status = status;
+    if (category && category !== 'All') filter.category = category;
+    if (priority && priority !== 'All') filter.priority = priority;
+    if (department && department !== 'All') filter.department = department;
 
-    if (status && status !== 'All') {
-      query += ` AND status = ?`;
-      params.push(status);
-    }
-    if (category && category !== 'All') {
-      query += ` AND category = ?`;
-      params.push(category);
-    }
-    if (priority && priority !== 'All') {
-      query += ` AND priority = ?`;
-      params.push(priority);
-    }
-    if (department && department !== 'All') {
-      query += ` AND department = ?`;
-      params.push(department);
-    }
-
-    query += ` ORDER BY created_date DESC`;
-
-    const complaints = await all(query, params);
+    const complaints = await Complaint.find(filter).sort({ created_date: -1 });
 
     // Escape CSV values
     const escapeCsv = (val) => {
@@ -73,8 +57,8 @@ router.get('/csv', requireAdmin, async (req, res) => {
       escapeCsv(c.priority),
       escapeCsv(c.status),
       escapeCsv(c.assigned_staff || 'Unassigned'),
-      escapeCsv(c.created_date),
-      escapeCsv(c.resolved_date || 'N/A'),
+      escapeCsv(c.created_date ? new Date(c.created_date).toISOString() : ''),
+      escapeCsv(c.resolved_date ? new Date(c.resolved_date).toISOString() : 'N/A'),
       escapeCsv(c.resolution_remarks || ''),
       escapeCsv(c.description)
     ].join(','));

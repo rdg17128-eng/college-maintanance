@@ -1,12 +1,12 @@
 const express = require('express');
 const router = express.Router();
-const { all, run } = require('../config/db');
+const MaintenanceStaff = require('../models/MaintenanceStaff');
 const { requireAuth, requireAdmin } = require('../middleware/auth');
 
 // GET /api/staff
 router.get('/', requireAuth, async (req, res) => {
   try {
-    const staff = await all(`SELECT * FROM maintenance_staff ORDER BY role ASC, name ASC`);
+    const staff = await MaintenanceStaff.find().sort({ role: 1, name: 1 });
     res.json(staff);
   } catch (err) {
     console.error('Fetch staff error:', err);
@@ -23,14 +23,18 @@ router.post('/', requireAdmin, async (req, res) => {
     }
 
     const staffId = `stf-${Date.now().toString().slice(-4)}`;
-    await run(`
-      INSERT INTO maintenance_staff (staff_id, name, role, phone, email, status)
-      VALUES (?, ?, ?, ?, ?, 'Available')
-    `, [staffId, name, role, phone, email || '']);
+    const newStaff = await MaintenanceStaff.create({
+      staff_id: staffId,
+      name,
+      role,
+      phone,
+      email: email || '',
+      status: 'Available'
+    });
 
     res.status(201).json({
       message: 'Staff member added',
-      staff: { staff_id: staffId, name, role, phone, email, status: 'Available' }
+      staff: newStaff
     });
   } catch (err) {
     res.status(500).json({ error: 'Failed to add staff' });
@@ -43,7 +47,7 @@ router.put('/:id/status', requireAdmin, async (req, res) => {
     const { id } = req.params;
     const { status } = req.body;
 
-    await run(`UPDATE maintenance_staff SET status = ? WHERE staff_id = ?`, [status, id]);
+    await MaintenanceStaff.updateOne({ staff_id: id }, { $set: { status } });
     res.json({ message: 'Staff status updated' });
   } catch (err) {
     res.status(500).json({ error: 'Failed to update staff status' });

@@ -1,18 +1,15 @@
 const express = require('express');
 const router = express.Router();
-const { all, run } = require('../config/db');
+const Notification = require('../models/Notification');
 const { requireAuth } = require('../middleware/auth');
 
 // GET /api/notifications
 router.get('/', requireAuth, async (req, res) => {
   try {
     const { userId } = req.user;
-    const notifications = await all(`
-      SELECT * FROM notifications 
-      WHERE user_id = ? 
-      ORDER BY created_date DESC 
-      LIMIT 50
-    `, [userId]);
+    const notifications = await Notification.find({ user_id: userId })
+      .sort({ created_date: -1 })
+      .limit(50);
 
     res.json(notifications);
   } catch (err) {
@@ -27,11 +24,10 @@ router.put('/:id/read', requireAuth, async (req, res) => {
     const { id } = req.params;
     const { userId } = req.user;
 
-    await run(`
-      UPDATE notifications 
-      SET read_status = 1 
-      WHERE notification_id = ? AND user_id = ?
-    `, [id, userId]);
+    await Notification.updateOne(
+      { notification_id: id, user_id: userId },
+      { $set: { read_status: 1 } }
+    );
 
     res.json({ success: true, message: 'Notification marked as read' });
   } catch (err) {
@@ -44,11 +40,10 @@ router.put('/read-all', requireAuth, async (req, res) => {
   try {
     const { userId } = req.user;
 
-    await run(`
-      UPDATE notifications 
-      SET read_status = 1 
-      WHERE user_id = ?
-    `, [userId]);
+    await Notification.updateMany(
+      { user_id: userId },
+      { $set: { read_status: 1 } }
+    );
 
     res.json({ success: true, message: 'All notifications marked as read' });
   } catch (err) {

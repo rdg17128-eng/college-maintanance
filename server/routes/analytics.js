@@ -1,90 +1,111 @@
 const express = require('express');
 const router = express.Router();
-const { all, get } = require('../config/db');
+const Complaint = require('../models/Complaint');
 const { requireAdmin } = require('../middleware/auth');
 
-// GET /api/analytics - High-level metrics & breakdown data for Recharts
+// GET /api/analytics - High-level metrics & breakdown data
 router.get('/', requireAdmin, async (req, res) => {
   try {
-    // KPI summary counts
-    const totalCount = await get(`SELECT COUNT(*) as count FROM complaints`);
-    const newCount = await get(`SELECT COUNT(*) as count FROM complaints WHERE status = 'Submitted'`);
-    const pendingCount = await get(`SELECT COUNT(*) as count FROM complaints WHERE status IN ('Submitted', 'Under Review', 'Assigned')`);
-    const inProgressCount = await get(`SELECT COUNT(*) as count FROM complaints WHERE status = 'In Progress'`);
-    const resolvedCount = await get(`SELECT COUNT(*) as count FROM complaints WHERE status = 'Resolved'`);
-    const emergencyCount = await get(`SELECT COUNT(*) as count FROM complaints WHERE priority = 'Emergency' AND status != 'Resolved'`);
-    const highPriorityCount = await get(`SELECT COUNT(*) as count FROM complaints WHERE priority IN ('High', 'Emergency') AND status != 'Resolved'`);
+    const [
+      totalCount,
+      newCount,
+      pendingCount,
+      inProgressCount,
+      resolvedCount,
+      emergencyCount,
+      highPriorityCount
+    ] = await Promise.all([
+      Complaint.countDocuments(),
+      Complaint.countDocuments({ status: 'Submitted' }),
+      Complaint.countDocuments({ status: { $in: ['Submitted', 'Under Review', 'Assigned'] } }),
+      Complaint.countDocuments({ status: 'In Progress' }),
+      Complaint.countDocuments({ status: 'Resolved' }),
+      Complaint.countDocuments({ priority: 'Emergency', status: { $ne: 'Resolved' } }),
+      Complaint.countDocuments({ priority: { $in: ['High', 'Emergency'] }, status: { $ne: 'Resolved' } })
+    ]);
 
     // Department-wise complaints
-    const deptWise = await all(`
-      SELECT 
-        department,
-        COUNT(*) as total,
-        SUM(CASE WHEN status = 'Resolved' THEN 1 ELSE 0 END) as resolved,
-        SUM(CASE WHEN status != 'Resolved' THEN 1 ELSE 0 END) as pending
-      FROM complaints 
-      GROUP BY department
-      ORDER BY total DESC
-    `);
+    const deptWise = await Complaint.aggregate([
+      {
+        $group: {
+          _id: '$department',
+          total: { $sum: 1 },
+          resolved: { $sum: { $cond: [{ $eq: ['$status', 'Resolved'] }, 1, 0] } },
+          pending: { $sum: { $cond: [{ $ne: ['$status', 'Resolved'] }, 1, 0] } }
+        }
+      },
+      { $project: { _id: 0, department: '$_id', total: 1, resolved: 1, pending: 1 } },
+      { $sort: { total: -1 } }
+    ]);
 
     // Category-wise maintenance issues
-    const categoryWise = await all(`
-      SELECT 
-        category,
-        COUNT(*) as count,
-        SUM(CASE WHEN priority = 'Emergency' THEN 1 ELSE 0 END) as emergencyCount
-      FROM complaints 
-      GROUP BY category
-      ORDER BY count DESC
-    `);
+    const categoryWise = await Complaint.aggregate([
+      {
+        $group: {
+          _id: '$category',
+          count: { $sum: 1 },
+          emergencyCount: { $sum: { $cond: [{ $eq: ['$priority', 'Emergency'] }, 1, 0] } }
+        }
+      },
+      { $project: { _id: 0, category: '$_id', count: 1, emergencyCount: 1 } },
+      { $sort: { count: -1 } }
+    ]);
 
     // Priority breakdown
-    const priorityBreakdown = await all(`
-      SELECT priority, COUNT(*) as count
-      FROM complaints
-      GROUP BY priority
-    `);
+    const priorityBreakdown = await Complaint.aggregate([
+      { $group: { _id: '$priority', count: { $sum: 1 } } },
+      { $project: { _id: 0, priority: '$_id', count: 1 } }
+    ]);
 
     // Status distribution
-    const statusDistribution = await all(`
-      SELECT status, COUNT(*) as count
-      FROM complaints
-      GROUP BY status
-    `);
+    const statusDistribution = await Complaint.aggregate([
+      { $group: { _id: '$status', count: { $sum: 1 } } },
+      { $project: { _id: 0, status: '$_id', count: 1 } }
+    ]);
 
     // Frequently reported locations (Hotspots)
-    const topLocations = await all(`
-      SELECT 
-        building || ' - ' || room_number as location,
-        building,
-        room_number,
-        COUNT(*) as complaintCount,
-        category
-      FROM complaints
-      GROUP BY building, room_number
-      ORDER BY complaintCount DESC
-      LIMIT 8
-    `);
+    const topLocations = await Complaint.aggregate([
+      {
+        $group: {
+          _id: { building: '$building', room_number: '$room_number' },
+          complaintCount: { $sum: 1 },
+          category: { $first: '$category' }
+        }
+      },
+      {
+        $project: {
+          _id: 0,
+          building: '$_id.building',
+          room_number: '$_id.room_number',
+          location: { $concat: ['$_id.building', ' - ', '$_id.room_number'] },
+          complaintCount: 1,
+          category: 1
+        }
+      },
+      { $sort: { complaintCount: -1 } },
+      { $limit: 8 }
+    ]);
 
     // Maintenance team performance
-    const teamPerformance = await all(`
-      SELECT 
-        COALESCE(assigned_staff, 'Unassigned') as staffName,
-        COUNT(*) as assignedTotal,
-        SUM(CASE WHEN status = 'Resolved' THEN 1 ELSE 0 END) as resolvedTotal,
-        SUM(CASE WHEN status = 'In Progress' THEN 1 ELSE 0 END) as activeTotal
-      FROM complaints
-      WHERE assigned_staff IS NOT NULL
-      GROUP BY assigned_staff
-      ORDER BY assignedTotal DESC
-    `);
+    const teamPerformance = await Complaint.aggregate([
+      { $match: { assigned_staff: { $ne: null } } },
+      {
+        $group: {
+          _id: '$assigned_staff',
+          assignedTotal: { $sum: 1 },
+          resolvedTotal: { $sum: { $cond: [{ $eq: ['$status', 'Resolved'] }, 1, 0] } },
+          activeTotal: { $sum: { $cond: [{ $eq: ['$status', 'In Progress'] }, 1, 0] } }
+        }
+      },
+      { $project: { _id: 0, staffName: '$_id', assignedTotal: 1, resolvedTotal: 1, activeTotal: 1 } },
+      { $sort: { assignedTotal: -1 } }
+    ]);
 
     // Average resolution time (in hours) calculation
-    const resolvedItems = await all(`
-      SELECT created_date, resolved_date 
-      FROM complaints 
-      WHERE status = 'Resolved' AND resolved_date IS NOT NULL
-    `);
+    const resolvedItems = await Complaint.find({
+      status: 'Resolved',
+      resolved_date: { $ne: null }
+    }).select('created_date resolved_date');
 
     let avgResolutionHours = 18.5; // fallback benchmark
     if (resolvedItems.length > 0) {
@@ -105,13 +126,13 @@ router.get('/', requireAdmin, async (req, res) => {
 
     res.json({
       kpis: {
-        total: totalCount.count,
-        new: newCount.count,
-        pending: pendingCount.count,
-        inProgress: inProgressCount.count,
-        resolved: resolvedCount.count,
-        emergency: emergencyCount.count,
-        highPriority: highPriorityCount.count,
+        total: totalCount,
+        new: newCount,
+        pending: pendingCount,
+        inProgress: inProgressCount,
+        resolved: resolvedCount,
+        emergency: emergencyCount,
+        highPriority: highPriorityCount,
         avgResolutionHours
       },
       deptWise,

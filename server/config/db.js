@@ -1,148 +1,30 @@
-const sqlite3 = require('sqlite3').verbose();
-const path = require('path');
-const fs = require('fs');
+const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 
-const dbPath = path.resolve(__dirname, '../../database.sqlite');
-const uploadsDir = path.resolve(__dirname, '../../uploads');
-
-if (!fs.existsSync(uploadsDir)) {
-  fs.mkdirSync(uploadsDir, { recursive: true });
-}
-
-const db = new sqlite3.Database(dbPath, (err) => {
-  if (err) {
-    console.error('Failed to connect to SQLite database:', err.message);
-  } else {
-    console.log('Connected to SQLite database at:', dbPath);
-  }
-});
-
-// Helper for db.run with Promise
-function run(sql, params = []) {
-  return new Promise((resolve, reject) => {
-    db.run(sql, params, function (err) {
-      if (err) reject(err);
-      else resolve(this);
-    });
-  });
-}
-
-// Helper for db.get with Promise
-function get(sql, params = []) {
-  return new Promise((resolve, reject) => {
-    db.get(sql, params, (err, row) => {
-      if (err) reject(err);
-      else resolve(row);
-    });
-  });
-}
-
-// Helper for db.all with Promise
-function all(sql, params = []) {
-  return new Promise((resolve, reject) => {
-    db.all(sql, params, (err, rows) => {
-      if (err) reject(err);
-      else resolve(rows);
-    });
-  });
-}
+const User = require('../models/User');
+const Complaint = require('../models/Complaint');
+const ComplaintHistory = require('../models/ComplaintHistory');
+const Notification = require('../models/Notification');
+const MaintenanceStaff = require('../models/MaintenanceStaff');
+const Setting = require('../models/Setting');
 
 async function initDB() {
-  // Create tables
-  await run(`
-    CREATE TABLE IF NOT EXISTS users (
-      user_id TEXT PRIMARY KEY,
-      name TEXT NOT NULL,
-      email TEXT UNIQUE NOT NULL,
-      password TEXT NOT NULL,
-      role TEXT NOT NULL CHECK(role IN ('student', 'faculty', 'admin')),
-      department TEXT,
-      reg_number TEXT,
-      avatar_url TEXT,
-      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-    )
-  `);
+  const uri = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/campuscare';
 
-  await run(`
-    CREATE TABLE IF NOT EXISTS complaints (
-      complaint_id TEXT PRIMARY KEY,
-      reporter_id TEXT NOT NULL,
-      reporter_name TEXT NOT NULL,
-      reporter_role TEXT NOT NULL CHECK(reporter_role IN ('student', 'faculty')),
-      building TEXT NOT NULL,
-      block TEXT,
-      floor TEXT NOT NULL,
-      room_number TEXT NOT NULL,
-      room_type TEXT NOT NULL,
-      department TEXT,
-      category TEXT NOT NULL,
-      description TEXT NOT NULL,
-      image_url TEXT,
-      priority TEXT NOT NULL CHECK(priority IN ('Low', 'Medium', 'High', 'Emergency')),
-      status TEXT NOT NULL CHECK(status IN ('Submitted', 'Under Review', 'Assigned', 'In Progress', 'Resolved', 'Rejected')),
-      assigned_staff TEXT,
-      assigned_staff_phone TEXT,
-      internal_notes TEXT,
-      resolution_remarks TEXT,
-      created_date DATETIME DEFAULT CURRENT_TIMESTAMP,
-      updated_date DATETIME DEFAULT CURRENT_TIMESTAMP,
-      target_date DATETIME,
-      resolved_date DATETIME,
-      FOREIGN KEY (reporter_id) REFERENCES users(user_id)
-    )
-  `);
+  try {
+    await mongoose.connect(uri);
+    console.log('Connected to MongoDB database at:', uri);
 
-  await run(`
-    CREATE TABLE IF NOT EXISTS complaint_history (
-      history_id INTEGER PRIMARY KEY AUTOINCREMENT,
-      complaint_id TEXT NOT NULL,
-      previous_status TEXT,
-      new_status TEXT NOT NULL,
-      updated_by TEXT NOT NULL,
-      remarks TEXT,
-      timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
-      FOREIGN KEY (complaint_id) REFERENCES complaints(complaint_id)
-    )
-  `);
-
-  await run(`
-    CREATE TABLE IF NOT EXISTS notifications (
-      notification_id INTEGER PRIMARY KEY AUTOINCREMENT,
-      user_id TEXT NOT NULL,
-      complaint_id TEXT,
-      title TEXT,
-      message TEXT NOT NULL,
-      read_status INTEGER DEFAULT 0,
-      created_date DATETIME DEFAULT CURRENT_TIMESTAMP,
-      FOREIGN KEY (user_id) REFERENCES users(user_id)
-    )
-  `);
-
-  await run(`
-    CREATE TABLE IF NOT EXISTS maintenance_staff (
-      staff_id TEXT PRIMARY KEY,
-      name TEXT NOT NULL,
-      role TEXT NOT NULL,
-      phone TEXT NOT NULL,
-      email TEXT,
-      status TEXT DEFAULT 'Available'
-    )
-  `);
-
-  await run(`
-    CREATE TABLE IF NOT EXISTS settings (
-      key TEXT PRIMARY KEY,
-      value TEXT NOT NULL
-    )
-  `);
-
-  // Check if users exist; if not, seed default data
-  const userCount = await get(`SELECT COUNT(*) as count FROM users`);
-  if (userCount.count === 0) {
-    console.log('Seeding initial demonstration database...');
-    await seedData();
-    console.log('Demonstration database seeded successfully.');
+    // Check if initial users exist
+    const userCount = await User.countDocuments();
+    if (userCount === 0) {
+      console.log('Seeding initial MongoDB database...');
+      await seedData();
+      console.log('Demonstration data seeded into MongoDB successfully.');
+    }
+  } catch (err) {
+    console.error('Failed to connect to MongoDB:', err.message);
+    throw err;
   }
 }
 
@@ -153,227 +35,284 @@ async function seedData() {
   const adminPwd = bcrypt.hashSync('admin123', salt);
 
   // Users
-  await run(`
-    INSERT INTO users (user_id, name, email, password, role, department, reg_number, avatar_url)
-    VALUES 
-    ('usr-stu-101', 'Rahul Sharma', 'student@apexcollege.edu', ?, 'student', 'Computer Science & Engineering', '22CS104', 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=150'),
-    ('usr-stu-102', 'Aarav Patel', 'aarav.patel@apexcollege.edu', ?, 'student', 'Artificial Intelligence & ML', '23AI089', 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150'),
-    ('usr-fac-201', 'Dr. Priya Nair', 'faculty@apexcollege.edu', ?, 'faculty', 'Artificial Intelligence & ML', 'FAC-AIML-409', 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150'),
-    ('usr-fac-202', 'Prof. Vikram Sen', 'vikram.sen@apexcollege.edu', ?, 'faculty', 'Electronics & Comm. Engg', 'FAC-ECE-215', 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150'),
-    ('usr-adm-001', 'Apex Administration', 'admin@apexcollege.edu', ?, 'admin', 'Campus Infrastructure & Facilities', 'ADMIN-SYS-01', 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150')
-  `, [studentPwd, studentPwd, facultyPwd, facultyPwd, adminPwd]);
+  await User.insertMany([
+    {
+      user_id: 'usr-stu-101',
+      name: 'Rahul Sharma',
+      email: 'student@apexcollege.edu',
+      password: studentPwd,
+      role: 'student',
+      department: 'Computer Science & Engineering',
+      reg_number: '22CS104',
+      avatar_url: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=150'
+    },
+    {
+      user_id: 'usr-stu-102',
+      name: 'Aarav Patel',
+      email: 'aarav.patel@apexcollege.edu',
+      password: studentPwd,
+      role: 'student',
+      department: 'Artificial Intelligence & ML',
+      reg_number: '23AI089',
+      avatar_url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150'
+    },
+    {
+      user_id: 'usr-fac-201',
+      name: 'Dr. Priya Nair',
+      email: 'faculty@apexcollege.edu',
+      password: facultyPwd,
+      role: 'faculty',
+      department: 'Artificial Intelligence & ML',
+      reg_number: 'FAC-AIML-409',
+      avatar_url: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150'
+    },
+    {
+      user_id: 'usr-fac-202',
+      name: 'Prof. Vikram Sen',
+      email: 'vikram.sen@apexcollege.edu',
+      password: facultyPwd,
+      role: 'faculty',
+      department: 'Electronics & Comm. Engg',
+      reg_number: 'FAC-ECE-215',
+      avatar_url: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150'
+    },
+    {
+      user_id: 'usr-adm-001',
+      name: 'Apex Administration',
+      email: 'admin@apexcollege.edu',
+      password: adminPwd,
+      role: 'admin',
+      department: 'Campus Infrastructure & Facilities',
+      reg_number: 'ADMIN-SYS-01',
+      avatar_url: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150'
+    }
+  ]);
 
   // Maintenance Staff
-  await run(`
-    INSERT INTO maintenance_staff (staff_id, name, role, phone, email, status)
-    VALUES
-    ('stf-01', 'Rajesh Kumar', 'Senior Electrician', '+91 98450 12345', 'rajesh.electric@apexcollege.edu', 'Available'),
-    ('stf-02', 'Suresh Babu', 'HVAC & AC Technician', '+91 98450 23456', 'suresh.ac@apexcollege.edu', 'Available'),
-    ('stf-03', 'Manoj Gowda', 'Master Plumber', '+91 98450 34567', 'manoj.plumb@apexcollege.edu', 'Available'),
-    ('stf-04', 'Anita Roy', 'Network & Systems Specialist', '+91 98450 45678', 'anita.net@apexcollege.edu', 'Busy'),
-    ('stf-05', 'Karthik Verma', 'Furniture & Carpentry Lead', '+91 98450 56789', 'karthik.wood@apexcollege.edu', 'Available'),
-    ('stf-06', 'Lakshmi Devi', 'Hygiene & Housekeeping Supervisor', '+91 98450 67890', 'lakshmi.cleaning@apexcollege.edu', 'Available')
-  `);
+  await MaintenanceStaff.insertMany([
+    { staff_id: 'stf-01', name: 'Rajesh Kumar', role: 'Senior Electrician', phone: '+91 98450 12345', email: 'rajesh.electric@apexcollege.edu', status: 'Available' },
+    { staff_id: 'stf-02', name: 'Suresh Babu', role: 'HVAC & AC Technician', phone: '+91 98450 23456', email: 'suresh.ac@apexcollege.edu', status: 'Available' },
+    { staff_id: 'stf-03', name: 'Manoj Gowda', role: 'Master Plumber', phone: '+91 98450 34567', email: 'manoj.plumb@apexcollege.edu', status: 'Available' },
+    { staff_id: 'stf-04', name: 'Anita Roy', role: 'Network & Systems Specialist', phone: '+91 98450 45678', email: 'anita.net@apexcollege.edu', status: 'Busy' },
+    { staff_id: 'stf-05', name: 'Karthik Verma', role: 'Furniture & Carpentry Lead', phone: '+91 98450 56789', email: 'karthik.wood@apexcollege.edu', status: 'Available' },
+    { staff_id: 'stf-06', name: 'Lakshmi Devi', role: 'Hygiene & Housekeeping Supervisor', phone: '+91 98450 67890', email: 'lakshmi.cleaning@apexcollege.edu', status: 'Available' }
+  ]);
 
   // Pre-seed sample complaints
   const initialComplaints = [
     {
-      id: 'CMP-2026-001',
-      reporterId: 'usr-stu-101',
-      reporterName: 'Rahul Sharma',
-      reporterRole: 'student',
+      complaint_id: 'CMP-2026-001',
+      reporter_id: 'usr-stu-101',
+      reporter_name: 'Rahul Sharma',
+      reporter_role: 'student',
       building: 'APJ Abdul Kalam Science Block',
       block: 'Block B',
       floor: '3rd Floor',
-      roomNumber: 'Lab 304',
-      roomType: 'Computer Lab',
+      room_number: 'Lab 304',
+      room_type: 'Computer Lab',
       department: 'Computer Science & Engineering',
       category: 'Computer or Lab Equipment',
       description: 'Multiple desktop units (Systems 14, 15, and 16) are not powering on due to burnt power supply cables under desk row 3.',
-      imageUrl: 'https://images.unsplash.com/photo-1588508065123-287b28e013da?w=600',
+      image_url: 'https://images.unsplash.com/photo-1588508065123-287b28e013da?w=600',
       priority: 'High',
       status: 'In Progress',
-      assignedStaff: 'Anita Roy (Network & Systems Specialist)',
-      assignedPhone: '+91 98450 45678',
-      internalNotes: 'Anita inspected on Oct 24. Replacement SMPS ordered from campus inventory.',
-      resolutionRemarks: 'Replacement units arrived. Power supply installation in progress.',
-      createdDate: '2026-10-23 10:15:00',
-      updatedDate: '2026-10-24 14:30:00'
+      assigned_staff: 'Anita Roy (Network & Systems Specialist)',
+      assigned_staff_phone: '+91 98450 45678',
+      internal_notes: 'Anita inspected on Oct 24. Replacement SMPS ordered from campus inventory.',
+      resolution_remarks: 'Replacement units arrived. Power supply installation in progress.',
+      created_date: new Date('2026-10-23T10:15:00Z'),
+      updated_date: new Date('2026-10-24T14:30:00Z')
     },
     {
-      id: 'CMP-2026-002',
-      reporterId: 'usr-fac-201',
-      reporterName: 'Dr. Priya Nair',
-      reporterRole: 'faculty',
+      complaint_id: 'CMP-2026-002',
+      reporter_id: 'usr-fac-201',
+      reporter_name: 'Dr. Priya Nair',
+      reporter_role: 'faculty',
       building: 'Sir M. Visvesvaraya Tech Tower',
       block: 'Block A',
       floor: '4th Floor',
-      roomNumber: 'Seminar Hall 401',
-      roomType: 'Seminar Hall',
+      room_number: 'Seminar Hall 401',
+      room_type: 'Seminar Hall',
       department: 'Artificial Intelligence & ML',
       category: 'Fan or Air Conditioning',
       description: 'Ceiling cassette AC unit 2 is leaking condensation water onto faculty seating row and creating a puddle.',
-      imageUrl: 'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=600',
+      image_url: 'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=600',
       priority: 'Emergency',
       status: 'Assigned',
-      assignedStaff: 'Suresh Babu (HVAC & AC Technician)',
-      assignedPhone: '+91 98450 23456',
-      internalNotes: 'Scheduled immediate check before 2 PM guest lecture.',
-      resolutionRemarks: 'Assigned to HVAC team with high priority ticket.',
-      createdDate: '2026-10-25 09:00:00',
-      updatedDate: '2026-10-25 09:45:00'
+      assigned_staff: 'Suresh Babu (HVAC & AC Technician)',
+      assigned_staff_phone: '+91 98450 23456',
+      internal_notes: 'Scheduled immediate check before 2 PM guest lecture.',
+      resolution_remarks: 'Assigned to HVAC team with high priority ticket.',
+      created_date: new Date('2026-10-25T09:00:00Z'),
+      updated_date: new Date('2026-10-25T09:45:00Z')
     },
     {
-      id: 'CMP-2026-003',
-      reporterId: 'usr-stu-101',
-      reporterName: 'Rahul Sharma',
-      reporterRole: 'student',
+      complaint_id: 'CMP-2026-003',
+      reporter_id: 'usr-stu-101',
+      reporter_name: 'Rahul Sharma',
+      reporter_role: 'student',
       building: 'Ramanujan Academic Complex',
       block: 'Block C',
       floor: '2nd Floor',
-      roomNumber: 'Room 212',
-      roomType: 'Classroom',
+      room_number: 'Room 212',
+      room_type: 'Classroom',
       department: 'Computer Science & Engineering',
       category: 'Electrical',
       description: 'Tube lights on the whiteboard side are flickering violently, making it difficult to read lecture notes.',
-      imageUrl: 'https://images.unsplash.com/photo-1513506003901-1e6a229e2d15?w=600',
+      image_url: 'https://images.unsplash.com/photo-1513506003901-1e6a229e2d15?w=600',
       priority: 'Medium',
       status: 'Resolved',
-      assignedStaff: 'Rajesh Kumar (Senior Electrician)',
-      assignedPhone: '+91 98450 12345',
-      internalNotes: 'Choke and LED starter replaced on 24th Oct.',
-      resolutionRemarks: 'Replaced defective fluorescent ballast with energy-efficient Philips LED tube batten. Checked and verified functional.',
-      createdDate: '2026-10-21 11:20:00',
-      updatedDate: '2026-10-22 16:00:00',
-      resolvedDate: '2026-10-22 16:00:00'
+      assigned_staff: 'Rajesh Kumar (Senior Electrician)',
+      assigned_staff_phone: '+91 98450 12345',
+      internal_notes: 'Choke and LED starter replaced on 24th Oct.',
+      resolution_remarks: 'Replaced defective fluorescent ballast with energy-efficient Philips LED tube batten. Checked and verified functional.',
+      created_date: new Date('2026-10-21T11:20:00Z'),
+      updated_date: new Date('2026-10-22T16:00:00Z'),
+      resolved_date: new Date('2026-10-22T16:00:00Z')
     },
     {
-      id: 'CMP-2026-004',
-      reporterId: 'usr-fac-202',
-      reporterName: 'Prof. Vikram Sen',
-      reporterRole: 'faculty',
+      complaint_id: 'CMP-2026-004',
+      reporter_id: 'usr-fac-202',
+      reporter_name: 'Prof. Vikram Sen',
+      reporter_role: 'faculty',
       building: 'Sir M. Visvesvaraya Tech Tower',
       block: 'Block B',
       floor: '1st Floor',
-      roomNumber: 'Faculty Cabin 108',
-      roomType: 'Faculty Room',
+      room_number: 'Faculty Cabin 108',
+      room_type: 'Faculty Room',
       department: 'Electronics & Comm. Engg',
       category: 'Internet or Network',
       description: 'LAN port wall socket in cabin 108 is damaged. Wi-Fi signal is too weak inside the cabin for online research meetings.',
-      imageUrl: 'https://images.unsplash.com/photo-1544197150-b99a580bb7a8?w=600',
+      image_url: 'https://images.unsplash.com/photo-1544197150-b99a580bb7a8?w=600',
       priority: 'High',
       status: 'Under Review',
-      assignedStaff: null,
-      assignedPhone: null,
-      internalNotes: 'Needs RJ45 faceplate replacement and switch port reactivation.',
-      resolutionRemarks: null,
-      createdDate: '2026-10-25 14:10:00',
-      updatedDate: '2026-10-25 14:10:00'
+      assigned_staff: null,
+      assigned_staff_phone: null,
+      internal_notes: 'Needs RJ45 faceplate replacement and switch port reactivation.',
+      resolution_remarks: null,
+      created_date: new Date('2026-10-25T14:10:00Z'),
+      updated_date: new Date('2026-10-25T14:10:00Z')
     },
     {
-      id: 'CMP-2026-005',
-      reporterId: 'usr-stu-102',
-      reporterName: 'Aarav Patel',
-      reporterRole: 'student',
+      complaint_id: 'CMP-2026-005',
+      reporter_id: 'usr-stu-102',
+      reporter_name: 'Aarav Patel',
+      reporter_role: 'student',
       building: 'Central Library Building',
       block: 'Central Wing',
       floor: '1st Floor',
-      roomNumber: 'Reference Section',
-      roomType: 'Library',
+      room_number: 'Reference Section',
+      room_type: 'Library',
       department: 'General / Campus Facilities',
       category: 'Plumbing',
       description: 'Men’s restroom on the 1st floor has a continuous faucet overflow from the center washbasin.',
-      imageUrl: 'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?w=600',
+      image_url: 'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?w=600',
       priority: 'Emergency',
       status: 'In Progress',
-      assignedStaff: 'Manoj Gowda (Master Plumber)',
-      assignedPhone: '+91 98450 34567',
-      internalNotes: 'Main stopcock closed temporarily to prevent water wastage.',
-      resolutionRemarks: 'Plumber on site fixing valve spindle.',
-      createdDate: '2026-10-25 08:30:00',
-      updatedDate: '2026-10-25 10:00:00'
+      assigned_staff: 'Manoj Gowda (Master Plumber)',
+      assigned_staff_phone: '+91 98450 34567',
+      internal_notes: 'Main stopcock closed temporarily to prevent water wastage.',
+      resolution_remarks: 'Plumber on site fixing valve spindle.',
+      created_date: new Date('2026-10-25T08:30:00Z'),
+      updated_date: new Date('2026-10-25T10:00:00Z')
     },
     {
-      id: 'CMP-2026-006',
-      reporterId: 'usr-fac-201',
-      reporterName: 'Dr. Priya Nair',
-      reporterRole: 'faculty',
+      complaint_id: 'CMP-2026-006',
+      reporter_id: 'usr-fac-201',
+      reporter_name: 'Dr. Priya Nair',
+      reporter_role: 'faculty',
       building: 'Sir M. Visvesvaraya Tech Tower',
       block: 'Block A',
       floor: '3rd Floor',
-      roomNumber: 'AIML Research Lab',
-      roomType: 'Laboratory',
+      room_number: 'AIML Research Lab',
+      room_type: 'Laboratory',
       department: 'Artificial Intelligence & ML',
       category: 'Furniture and Equipment',
       description: 'Three ergonomic high-back chairs have broken hydraulic cylinders and do not hold height.',
-      imageUrl: 'https://images.unsplash.com/photo-1580481077197-28565b1cdb1c?w=600',
+      image_url: 'https://images.unsplash.com/photo-1580481077197-28565b1cdb1c?w=600',
       priority: 'Low',
       status: 'Submitted',
-      assignedStaff: null,
-      assignedPhone: null,
-      internalNotes: null,
-      resolutionRemarks: null,
-      createdDate: '2026-10-26 08:45:00',
-      updatedDate: '2026-10-26 08:45:00'
+      assigned_staff: null,
+      assigned_staff_phone: null,
+      internal_notes: null,
+      resolution_remarks: null,
+      created_date: new Date('2026-10-26T08:45:00Z'),
+      updated_date: new Date('2026-10-26T08:45:00Z')
     }
   ];
 
-  for (const c of initialComplaints) {
-    await run(`
-      INSERT INTO complaints (
-        complaint_id, reporter_id, reporter_name, reporter_role,
-        building, block, floor, room_number, room_type, department,
-        category, description, image_url, priority, status,
-        assigned_staff, assigned_staff_phone, internal_notes, resolution_remarks,
-        created_date, updated_date, resolved_date
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `, [
-      c.id, c.reporterId, c.reporterName, c.reporterRole,
-      c.building, c.block, c.floor, c.roomNumber, c.roomType, c.department,
-      c.category, c.description, c.imageUrl, c.priority, c.status,
-      c.assignedStaff, c.assignedPhone, c.internalNotes, c.resolutionRemarks,
-      c.createdDate, c.updatedDate, c.resolvedDate || null
-    ]);
+  await Complaint.insertMany(initialComplaints);
 
-    // Add history entries
-    await run(`
-      INSERT INTO complaint_history (complaint_id, previous_status, new_status, updated_by, remarks, timestamp)
-      VALUES (?, NULL, 'Submitted', ?, 'Complaint submitted via portal', ?)
-    `, [c.id, c.reporterName, c.createdDate]);
+  // Add initial history entries
+  const historyEntries = [];
+  for (const c of initialComplaints) {
+    historyEntries.push({
+      complaint_id: c.complaint_id,
+      previous_status: null,
+      new_status: 'Submitted',
+      updated_by: c.reporter_name,
+      remarks: 'Complaint submitted via portal',
+      timestamp: c.created_date
+    });
 
     if (c.status !== 'Submitted') {
-      await run(`
-        INSERT INTO complaint_history (complaint_id, previous_status, new_status, updated_by, remarks, timestamp)
-        VALUES (?, 'Submitted', ?, 'Admin Facility Office', ?, ?)
-      `, [c.id, c.status, c.resolutionRemarks || `Status updated to ${c.status}`, c.updatedDate]);
+      historyEntries.push({
+        complaint_id: c.complaint_id,
+        previous_status: 'Submitted',
+        new_status: c.status,
+        updated_by: 'Admin Facility Office',
+        remarks: c.resolution_remarks || `Status updated to ${c.status}`,
+        timestamp: c.updated_date
+      });
     }
   }
+  await ComplaintHistory.insertMany(historyEntries);
 
   // Pre-seed notifications
-  await run(`
-    INSERT INTO notifications (user_id, complaint_id, title, message, read_status, created_date)
-    VALUES
-    ('usr-stu-101', 'CMP-2026-003', 'Issue Resolved', 'Your complaint CMP-2026-003 for Classroom 212 tube light has been verified & marked RESOLVED.', 0, '2026-10-22 16:05:00'),
-    ('usr-stu-101', 'CMP-2026-001', 'Staff Assigned', 'Technician Anita Roy has been assigned to your Computer Lab 304 issue (CMP-2026-001).', 1, '2026-10-24 14:30:00'),
-    ('usr-fac-201', 'CMP-2026-002', 'High Priority Assigned', 'HVAC Technician Suresh Babu dispatched for Seminar Hall 401 AC leakage (CMP-2026-002).', 0, '2026-10-25 09:45:00')
-  `);
+  await Notification.insertMany([
+    {
+      user_id: 'usr-stu-101',
+      complaint_id: 'CMP-2026-003',
+      title: 'Issue Resolved',
+      message: 'Your complaint CMP-2026-003 for Classroom 212 tube light has been verified & marked RESOLVED.',
+      read_status: 0,
+      created_date: new Date('2026-10-22T16:05:00Z')
+    },
+    {
+      user_id: 'usr-stu-101',
+      complaint_id: 'CMP-2026-001',
+      title: 'Staff Assigned',
+      message: 'Technician Anita Roy has been assigned to your Computer Lab 304 issue (CMP-2026-001).',
+      read_status: 1,
+      created_date: new Date('2026-10-24T14:30:00Z')
+    },
+    {
+      user_id: 'usr-fac-201',
+      complaint_id: 'CMP-2026-002',
+      title: 'High Priority Assigned',
+      message: 'HVAC Technician Suresh Babu dispatched for Seminar Hall 401 AC leakage (CMP-2026-002).',
+      read_status: 0,
+      created_date: new Date('2026-10-25T09:45:00Z')
+    }
+  ]);
 
   // Settings
-  await run(`
-    INSERT INTO settings (key, value)
-    VALUES 
-    ('college_name', 'Apex Institute of Technology'),
-    ('campus_tagline', 'Excellence in Engineering & Campus Living'),
-    ('admin_email', 'facilities@apexcollege.edu'),
-    ('emergency_helpline', '+91 80 2345 6789'),
-    ('auto_assignment', 'true')
-  `);
+  await Setting.insertMany([
+    { key: 'college_name', value: 'Apex Institute of Technology' },
+    { key: 'campus_tagline', value: 'Excellence in Engineering & Campus Living' },
+    { key: 'admin_email', value: 'facilities@apexcollege.edu' },
+    { key: 'emergency_helpline', value: '+91 80 2345 6789' },
+    { key: 'auto_assignment', value: 'true' }
+  ]);
 }
 
 module.exports = {
-  db,
-  run,
-  get,
-  all,
-  initDB
+  mongoose,
+  initDB,
+  User,
+  Complaint,
+  ComplaintHistory,
+  Notification,
+  MaintenanceStaff,
+  Setting
 };
